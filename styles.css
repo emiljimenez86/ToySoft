@@ -1,0 +1,829 @@
+/* Estilos generales */
+body {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Estilos para el login */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para la sección de la aplicación */
+.app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo-container img {
+    max-width: 220px;
+    height: auto;
+    border-radius: 50%;
+    padding: 15px;
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.welcome-message {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.welcome-message h1 {
+    font-size: 36px;
+    color: #0dcaf0;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.welcome-subtitle {
+    color: #888;
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Estilos para formularios */
+.form-control {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 12px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.form-control:focus {
+    background-color: #333;
+    border-color: #0dcaf0;
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+}
+
+.form-control::placeholder {
+    color: #888;
+}
+
+/* Estilos para botones */
+.btn {
+    padding: 12px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+.btn-info {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+    color: #000;
+}
+
+.btn-info:hover {
+    background-color: #31d2f2;
+    border-color: #25cff2;
+    color: #000;
+}
+
+.btn-outline-info {
+    color: #0dcaf0;
+    border-color: #0dcaf0;
+    background-color: transparent;
+}
+
+.btn-outline-info:hover {
+    color: #000;
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+/* Estilos para la navegación */
+.nav-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.nav-buttons .btn {
+    padding: 20px 40px;
+    font-size: 20px;
+    text-align: center;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* Botón Punto de Venta más grande */
+.nav-buttons .btn-info {
+    padding: 25px 45px;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+/* Botón Cerrar Sesión más pequeño */
+.nav-buttons .btn-danger {
+    padding: 12px 30px;
+    font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 10px;
+    }
+    
+    .login-container,
+    .app-container {
+        margin: 10px;
+        padding: 20px;
+    }
+    
+    .welcome-message h1 {
+        font-size: 28px;
+    }
+
+    .welcome-subtitle {
+        font-size: 14px;
+    }
+
+    .logo-container img {
+        max-width: 180px;
+    }
+
+    .nav-buttons .btn-info {
+        padding: 20px 35px;
+        font-size: 22px;
+    }
+
+    .nav-buttons .btn-danger {
+        padding: 10px 25px;
+        font-size: 14px;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.login-container, .app-container {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Estilos de la sección de la aplicación */
+.app-container {
+    width: 100%;
+    max-width: 800px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2.5rem;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.app-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.app-content {
+    display: flex;
+    justify-content: center;
+}
+
+/* Estilos para las tablas */
+.table {
+    color: #fff;
+    margin-bottom: 0;
+}
+
+.table-dark {
+    background-color: #2a2a2a;
+}
+
+.table-dark td,
+.table-dark th {
+    border-color: #444;
+    padding: 12px;
+    vertical-align: middle;
+}
+
+/* Estilos para las cards */
+.card {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+.card-header {
+    background-color: #333;
+    border-bottom: 1px solid #444;
+    padding: 15px 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Estilos para los checkboxes */
+.form-check-input {
+    width: 1.1em;
+    height: 1.1em;
+    margin-top: 0.25em;
+    vertical-align: top;
+    background-color: #2a2a2a;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    border: 1px solid #6c757d;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-check-input:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+}
+
+/* Estilos para la paginación */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    background-color: #2a2a2a;
+    border-color: #444;
+    color: #fff;
+    padding: 8px 16px;
+}
+
+.page-link:hover {
+    background-color: #333;
+    border-color: #444;
+    color: #fff;
+}
+
+.page-item.active .page-link {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+    color: #000;
+}
+
+/* Estilos para los select */
+.form-select {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 12px;
+}
+
+.form-select:focus {
+    background-color: #333;
+    border-color: #0dcaf0;
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+}
+
+/* Estilos para los títulos */
+h1, h2, h3, h4, h5, h6 {
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+/* Estilos para el scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #dc3545;
+}
+
+/* Estilos para etiquetas de formulario */
+.form-check-label {
+    color: #fff;
+    cursor: pointer;
+}
+
+/* Estilos para inputs específicos */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="tel"],
+select {
+    background-color: #333 !important;
+    border: 1px solid #444 !important;
+    color: #fff !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+select:focus {
+    background-color: #333 !important;
+    border-color: #0d6efd !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* Estilos para los botones de acción */
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+/* Estilos para los mensajes de alerta */
+.alert {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+/* Estilos para los tooltips */
+.tooltip {
+    background-color: #333;
+    border: 1px solid #444;
+}
+
+/* Estilos para los modales */
+.modal-content {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+.modal-header {
+    border-bottom: 1px solid #444;
+}
+
+.modal-footer {
+    border-top: 1px solid #444;
+}
+
+/* Estilos para los dropdowns */
+.dropdown-menu {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+}
+
+.dropdown-item {
+    color: #fff;
+}
+
+.dropdown-item:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+/* Estilos para los badges */
+.badge {
+    font-weight: 600;
+}
+
+/* Estilos para los spinners */
+.spinner-border {
+    color: #0dcaf0;
+}
+
+/* Estilos para los inputs de tipo range */
+input[type="range"] {
+    background-color: #333;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    background: #0dcaf0;
+}
+
+input[type="range"]::-moz-range-thumb {
+    background: #0dcaf0;
+}
+
+/* Estilos para los inputs de tipo file */
+input[type="file"] {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+/* Estilos para los inputs de tipo date */
+input[type="date"] {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+/* Estilos para los inputs de tipo time */
+input[type="time"] {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+/* Estilos para los inputs de tipo datetime-local */
+input[type="datetime-local"] {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+/* Estilos para los inputs de tipo color */
+input[type="color"] {
+    background-color: #333;
+    border: 1px solid #444;
+}
+
+/* Estilos para los inputs de tipo search */
+input[type="search"] {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+/* Estilos para los inputs de tipo url */
+input[type="url"] {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+/* Estilos para los inputs de tipo password */
+input[type="password"] {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+/* Estilos para los inputs de tipo checkbox y radio */
+input[type="checkbox"],
+input[type="radio"] {
+    background-color: #333;
+    border: 1px solid #444;
+}
+
+/* Estilos para los inputs deshabilitados */
+input:disabled,
+select:disabled,
+textarea:disabled {
+    background-color: #444 !important;
+    border-color: #555 !important;
+    color: #888 !important;
+    cursor: not-allowed;
+}
+
+/* Estilos para los inputs de solo lectura */
+input[readonly],
+select[readonly],
+textarea[readonly] {
+    background-color: #444 !important;
+    border-color: #555 !important;
+    color: #888 !important;
+}
+
+/* Estilos para los inputs requeridos */
+input:required,
+select:required,
+textarea:required {
+    border-left: 3px solid #dc3545;
+}
+
+/* Estilos para los inputs válidos */
+input:valid,
+select:valid,
+textarea:valid {
+    border-left: 3px solid #198754;
+}
+
+/* Estilos para los inputs inválidos */
+input:invalid,
+select:invalid,
+textarea:invalid {
+    border-left: 3px solid #dc3545;
+}
+
+/* Estilos para los inputs con placeholder */
+::placeholder {
+    color: #888;
+    opacity: 1;
+}
+
+/* Estilos para los inputs con autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #333 inset !important;
+    -webkit-text-fill-color: #fff !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Estilos para los inputs con focus */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Estilos para los inputs con hover */
+input:hover,
+select:hover,
+textarea:hover {
+    border-color: #0dcaf0;
+}
+
+/* Estilos para los inputs con active */
+input:active,
+select:active,
+textarea:active {
+    border-color: #0dcaf0;
+}
+
+/* Estilos para los inputs con focus-visible */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Estilos para los inputs con focus-within */
+input:focus-within,
+select:focus-within,
+textarea:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Estilos para los títulos */
+h1, h2, h3 {
+    color: white;
+    margin-bottom: 1.5rem;
+}
+
+/* Estilos para las listas */
+#listaClientes,
+#listaCategorias,
+#listaProductos {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 1rem;
+}
+
+/* Estilos para el scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #dc3545;
+}
+
+/* Estilos específicos para POS */
+#categorias button {
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #0dcaf0, #6610f2);
+    color: white;
+    border: none;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#categorias button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.table-striped > tbody > tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+input[type="text"], input[type="number"] {
+    transition: box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus, input[type="number"]:focus {
+    box-shadow: 0 0 8px rgba(13, 202, 240, 0.5);
+    outline: none;
+}
+
+/* Estilos para checkboxes en tablas */
+.table .form-check-input {
+    margin: 0;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
+
+.table th .form-check-input {
+    margin: 0;
+    vertical-align: middle;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Ajuste para el ancho de las columnas de checkbox */
+.table th:first-child,
+.table td:first-child {
+    width: 40px;
+    text-align: center;
+}
+
+/* Ajuste para la columna de acciones */
+.table th:last-child,
+.table td:last-child {
+    width: 100px;
+    text-align: center;
+}
+
+/* Estilos para las tablas responsivas */
+.table-responsive {
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+/* Estilos para las filas de la tabla */
+.table-dark tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-dark tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Estilos para los botones en las tablas */
+.table .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+/* Estilos para los checkboxes en modo oscuro */
+.table-dark .form-check-input {
+    background-color: #2a2a2a;
+    border-color: #6c757d;
+}
+
+.table-dark .form-check-input:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.table-dark .form-check-input:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Efecto hover para los checkboxes */
+.form-check-input:hover {
+    border-color: #dc3545;
+    cursor: pointer;
+}
+
+/* Animación al marcar el checkbox */
+.form-check-input:checked {
+    animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Estilos para contenedores responsivos */
+.container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+@media (min-width: 1600px) {
+    .container-fluid {
+        max-width: 1600px;
+    }
+}
+
+/* Estilos para las cards */
+.card {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Ajustes para tablas en pantallas grandes */
+@media (min-width: 992px) {
+    .table-responsive {
+        margin: 0 -1.5rem;
+        padding: 0 1.5rem;
+    }
+}
+
+/* Estilos para el botón de instalación */
+#installButton {
+    transition: all 0.3s ease;
+    border: 2px solid #0dcaf0;
+    padding: 10px 20px;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+#installButton:hover {
+    background-color: #0dcaf0;
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.3);
+}
+
+#installButton i {
+    margin-right: 8px;
+}
+
+/* Animación para el botón de instalación */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+#installButton {
+    animation: pulse 2s infinite;
+}
+  

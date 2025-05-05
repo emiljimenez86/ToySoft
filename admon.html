@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - POS Restaurante</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                    <h1 class="text-white mb-3 mb-md-0">Administración</h1>
+                    <a href="index.html" class="btn btn-outline-light">Volver al Inicio</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Clientes -->
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Gestión de Clientes</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <input type="text" id="documentoCliente" class="form-control" placeholder="Documento o NIT">
+                            <input type="text" id="nombreCliente" class="form-control mt-2" placeholder="Nombres">
+                            <input type="text" id="apellidoCliente" class="form-control mt-2" placeholder="Apellidos">
+                            <input type="tel" id="telefonoCliente" class="form-control mt-2" placeholder="Teléfono">
+                            <input type="email" id="correoCliente" class="form-control mt-2" placeholder="Correo electrónico">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex flex-column flex-md-row gap-2">
+                                <button class="btn btn-info" onclick="agregarCliente()">Agregar Cliente</button>
+                                <button class="btn btn-danger" onclick="eliminarCliente()">Eliminar Clientes Seleccionados</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-6">
+                            <input type="text" id="buscarCliente" class="form-control" placeholder="Buscar cliente..." onkeyup="filtrarClientes()">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Seleccionar</th>
+                                    <th>Documento</th>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Teléfono</th>
+                                    <th>Correo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaClientes">
+                                <!-- Los clientes se cargarán aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
+                        <div class="mb-3 mb-md-0">
+                            <select id="clientesPorPagina" class="form-select" onchange="cambiarPaginaClientes(1)">
+                                <option value="5">5 por página</option>
+                                <option value="10" selected>10 por página</option>
+                                <option value="20">20 por página</option>
+                            </select>
+                        </div>
+                        <nav>
+                            <ul class="pagination" id="paginacionClientes">
+                                <!-- La paginación se generará aquí -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Categorías -->
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Gestión de Categorías</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <input type="text" id="nuevaCategoria" class="form-control" placeholder="Escribe el nombre de la nueva categoria">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex flex-column flex-md-row gap-2">
+                                <button class="btn btn-info" onclick="agregarCategoria()">Agregar Categoría</button>
+                                <button class="btn btn-danger" onclick="eliminarCategoria()">Eliminar Categorías Seleccionadas</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="listaCategorias" class="mt-3">
+                    <!-- Las categorías se cargarán aquí -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Productos -->
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Gestión de Productos</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <input type="text" id="nombreProducto" class="form-control" placeholder="Escribir el nombre del nuevo producto">
+                            <input type="number" id="precioProducto" class="form-control mt-2" placeholder="Escribir el precio en numeros sin puntos Ejemplo: 12800">
+                            <select id="categoriaProducto" class="form-select mt-2">
+                                <option value="">Seleccionar categoría</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex flex-column flex-md-row gap-2">
+                                <button class="btn btn-info" onclick="agregarProducto()">Agregar Producto</button>
+                                <button class="btn btn-danger" onclick="eliminarProducto()">Eliminar Productos Seleccionados</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-6">
+                            <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto..." onkeyup="filtrarProductos()">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Seleccionar</th>
+                                    <th>Nombre</th>
+                                    <th>Precio</th>
+                                    <th>Categoría</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaProductos">
+                                <!-- Los productos se cargarán aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
+                        <div class="mb-3 mb-md-0">
+                            <select id="productosPorPagina" class="form-select" onchange="cambiarPaginaProductos(1)">
+                                <option value="5">5 por página</option>
+                                <option value="10" selected>10 por página</option>
+                                <option value="20">20 por página</option>
+                            </select>
+                        </div>
+                        <nav>
+                            <ul class="pagination" id="paginacionProductos">
+                                <!-- La paginación se generará aquí -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Ventas -->
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Historial de Ventas</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Mesa</th>
+                                <th>Total</th>
+                                <th>Propina</th>
+                                <th>Descuento</th>
+                                <th>Total Final</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historialVentas">
+                            <!-- El historial se cargará aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="seguridad.js"></script>
+    <script src="admon.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            verificarAcceso();
+            cargarCategorias();
+            cargarProductos();
+            cargarClientes();
+            cargarVentas();
+        });
+    </script>
+</body>
+</html> 
