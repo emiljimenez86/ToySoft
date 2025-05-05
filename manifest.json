@@ -1,6 +1,6 @@
 {
   "name": "ToySoft POS",
-  "short_name": "ToySoft",
+  "short_name": "POS",
   "description": "Sistema de Punto de Venta para Restaurantes",
   "start_url": "./index.html",
   "display": "standalone",
