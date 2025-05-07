@@ -2025,21 +2025,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función para mostrar/ocultar el panel de WhatsApp
 function toggleWhatsApp() {
-  const panel = document.getElementById('whatsappPanel');
-  const button = document.getElementById('toggleWhatsApp');
-  
-  if (!panel.classList.contains('active')) {
-    panel.classList.add('active');
-    button.innerHTML = '<i class="fas fa-times"></i>';
+    const whatsappPanel = document.getElementById('whatsappPanel');
+    const whatsappContainer = document.getElementById('whatsappContainer');
     
-    // Inicializar WhatsApp si no se ha hecho antes
-    if (!document.querySelector('#whatsappContainer iframe')) {
-      inicializarWhatsApp();
+    if (whatsappPanel.style.display === 'none' || !whatsappPanel.style.display) {
+        whatsappPanel.style.display = 'block';
+        // Crear un iframe para WhatsApp Web
+        whatsappContainer.innerHTML = `
+            <iframe 
+                src="https://web.whatsapp.com" 
+                style="width: 100%; height: 600px; border: none;"
+                allow="camera; microphone"
+            ></iframe>
+        `;
+    } else {
+        whatsappPanel.style.display = 'none';
+        whatsappContainer.innerHTML = '';
     }
-  } else {
-    panel.classList.remove('active');
-    button.innerHTML = '<i class="fab fa-whatsapp"></i>';
-  }
 }
 
 // Inicialización
