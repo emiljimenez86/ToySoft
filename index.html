@@ -50,10 +50,221 @@
         <h1 class="text-info">Sistema POS</h1>
       </div>
       <div class="app-content">
-        <div class="nav-buttons">
-          <a href="POS.html" class="btn btn-info btn-lg">Punto de Venta</a>
-          <a href="admon.html" class="btn btn-outline-info btn-lg">Administración</a>
-          <button class="btn btn-danger btn-lg" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <div class="header-container mb-4">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="mb-0">Restaurante POS</h2>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-danger btn-lg" onclick="cerrarSesion()">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="nav-buttons d-flex justify-content-center gap-3">
+          <a href="POS.html" class="btn btn-info btn-lg">
+            <i class="fas fa-cash-register"></i> Punto de Venta
+          </a>
+          <a href="admon.html" class="btn btn-outline-info btn-lg">
+            <i class="fas fa-cog"></i> Administración
+          </a>
+          <button class="btn btn-outline-info btn-lg" onclick="mostrarModalCierreDiario()">
+            <i class="fas fa-calculator"></i> Cierre Diario
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de Punto de Venta -->
+    <div id="posSection" class="pos-container" style="display: none;">
+      <div class="row">
+        <!-- Panel de Mesas -->
+        <div class="col-md-3">
+          <div class="mesas-panel">
+            <h3>Mesas</h3>
+            <div class="input-group mb-3">
+              <input type="text" id="nuevaMesa" class="form-control" placeholder="Número de mesa">
+              <button class="btn btn-info" id="btnNuevaMesa">Nueva Mesa</button>
+            </div>
+            <div id="mesasContainer" class="mesas-grid"></div>
+            <div class="pedidos-buttons mt-3">
+              <button class="btn btn-warning" onclick="crearPedidoDomicilio()">
+                <i class="fas fa-motorcycle"></i> Domicilio
+              </button>
+              <button class="btn btn-info" onclick="crearPedidoRecoger()">
+                <i class="fas fa-shopping-bag"></i> Recoger
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Productos y Orden -->
+        <div class="col-md-9">
+          <div class="row">
+            <!-- Panel de Productos -->
+            <div class="col-md-8">
+              <div class="productos-panel">
+                <h3>Productos</h3>
+                <div id="categorias" class="mb-3"></div>
+                <div class="table-responsive">
+                  <table class="table table-dark">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th>Acción</th>
+                        <th>Precio</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ordenCuerpo"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel de Orden -->
+            <div class="col-md-4">
+              <div class="orden-panel">
+                <h3>Orden - <span id="mesaActual">-</span></h3>
+                <div class="table-responsive">
+                  <table class="table table-dark">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th>Cant</th>
+                        <th>Precio</th>
+                        <th>Total</th>
+                        <th>Detalles</th>
+                        <th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ordenCuerpo"></tbody>
+                  </table>
+                </div>
+                <div class="orden-totales">
+                  <div class="mb-2">
+                    <label class="form-label">Propina (%)</label>
+                    <input type="number" id="propina" class="form-control" value="0">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Descuento</label>
+                    <input type="number" id="descuento" class="form-control" value="0">
+                  </div>
+                  <div id="desgloseTotal" class="mb-2"></div>
+                  <h4>Total: <span id="totalOrden">$ 0</span></h4>
+                </div>
+                <div class="orden-acciones">
+                  <button class="btn btn-warning" onclick="enviarACocina()">
+                    <i class="fas fa-utensils"></i> Enviar a Cocina
+                  </button>
+                  <button class="btn btn-success" onclick="mostrarModalPago()">
+                    <i class="fas fa-cash-register"></i> Generar Recibo
+                  </button>
+                  <button class="btn btn-danger" onclick="eliminarPedido()">
+                    <i class="fas fa-trash"></i> Eliminar
+                  </button>
+                  <button class="btn btn-info" onclick="mostrarModalCierreDiario()">
+                    <i class="fas fa-calculator"></i> Cierre Diario
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Pago -->
+  <div class="modal fade" id="modalPago" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title">Procesar Pago</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Sección de Clientes -->
+          <div class="mb-3">
+            <h6>Seleccionar Cliente</h6>
+            <div id="listaClientesPago" class="list-group">
+              <!-- Los clientes se cargarán aquí -->
+            </div>
+          </div>
+
+          <!-- Método de Pago -->
+          <div class="mb-3">
+            <label class="form-label">Método de Pago</label>
+            <select id="metodoPago" class="form-select bg-dark text-white border-light">
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
+            </select>
+          </div>
+
+          <!-- Sección de Efectivo -->
+          <div id="efectivoSection">
+            <div class="mb-3">
+              <label class="form-label">Monto Recibido</label>
+              <input type="number" id="montoRecibido" class="form-control bg-dark text-white border-light">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Cambio</label>
+              <div id="cambio" class="form-control bg-dark text-white border-light">$ 0</div>
+            </div>
+          </div>
+
+          <!-- Sección de Transferencia -->
+          <div id="transferenciaSection" style="display: none;">
+            <div class="mb-3">
+              <label class="form-label">Número de Transferencia</label>
+              <input type="text" id="numeroTransferencia" class="form-control bg-dark text-white border-light">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="procesarPago()">Confirmar Pago</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Cierre Diario -->
+  <div class="modal fade" id="modalCierreDiario" tabindex="-1" aria-labelledby="modalCierreDiarioLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCierreDiarioLabel">Cierre Diario</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <h6>Resumen de Ventas</h6>
+            <div>Total Ventas: <span id="totalVentasHoy">$ 0</span></div>
+            <div>Efectivo: <span id="totalEfectivoHoy">$ 0</span></div>
+            <div>Transferencia: <span id="totalTransferenciaHoy">$ 0</span></div>
+          </div>
+          
+          <div class="mb-3">
+            <h6>Gastos del Día</h6>
+            <div>Total Gastos: <span id="totalGastos">$ 0</span></div>
+            <small class="text-muted">Los gastos se toman del sistema de Gastos Diarios</small>
+          </div>
+          
+          <div class="mb-3">
+            <h6>Balance Final</h6>
+            <div>Balance: <span id="balanceFinal">$ 0</span></div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Detalles Adicionales</label>
+            <textarea class="form-control bg-dark text-white border-light" id="detallesCierre" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="guardarCierreDiario()">Guardar Cierre</button>
         </div>
       </div>
     </div>
@@ -61,7 +272,22 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="seguridad.js"></script>
   <script src="install.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Inicializar Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Inicializando Bootstrap...');
+      // Verificar que Bootstrap está disponible
+      if (typeof bootstrap !== 'undefined') {
+        console.log('Bootstrap está disponible');
+      } else {
+        console.error('Bootstrap no está disponible');
+      }
+    });
+  </script>
 </body>
 </html>
