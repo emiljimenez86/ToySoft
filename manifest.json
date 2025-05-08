@@ -1,15 +1,12 @@
 {
   "name": "ToySoft POS",
-  "short_name": "POS",
+  "short_name": "ToySoft POS",
   "description": "Sistema de Punto de Venta para Restaurantes",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1a1a1a",
+  "background_color": "#ffffff",
   "theme_color": "#0dcaf0",
   "orientation": "portrait",
-  "scope": "./",
-  "prefer_related_applications": false,
-  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "./image/logo-ToySoft.png",
@@ -27,7 +24,7 @@
   "shortcuts": [
     {
       "name": "Punto de Venta",
-      "url": "./pos.html",
+      "url": "./POS.html",
       "icons": [{ "src": "./image/logo-ToySoft.png", "sizes": "192x192" }]
     },
     {

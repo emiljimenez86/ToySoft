@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a1a1a">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div class="container-fluid mt-4">
@@ -179,19 +181,178 @@
                 </div>
             </div>
         </div>
+
+        <!-- Sección de Configuración de Horario -->
+        <div class="card bg-dark mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-info">Configuración de Horario</h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-info" onclick="mostrarModalConfiguracionCierre()">
+                        <i class="fas fa-clock"></i> Configurar hora de Cierre
+                    </button>
+                    <button class="btn btn-outline-warning" onclick="extenderHorario()">
+                        <i class="fas fa-clock"></i> Extender Horario
+                    </button>
+                    <button class="btn btn-outline-success" onclick="mostrarModalCierreDiario()">
+                        <i class="fas fa-file-invoice-dollar"></i> Cierre Diario
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Backup y Restauración -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <h4 class="text-info mb-3">Backup y Restauración</h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card bg-dark border-light">
+                                    <div class="card-body">
+                                        <h5 class="text-info">Backup Manual</h5>
+                                        <p class="text-muted">Descarga un archivo con todos los datos del sistema.</p>
+                                        <button class="btn btn-success" onclick="exportarDatos()">
+                                            <i class="fas fa-download"></i> Descargar Backup
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-dark border-light">
+                                    <div class="card-body">
+                                        <h5 class="text-info">Restaurar desde Archivo</h5>
+                                        <p class="text-muted">Restaura los datos desde un archivo de backup.</p>
+                                        <label class="btn btn-primary">
+                                            <i class="fas fa-upload"></i> Seleccionar Archivo
+                                            <input type="file" accept=".json" onchange="importarDatos(event)" style="display: none;">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card bg-dark border-light">
+                                    <div class="card-body">
+                                        <h5 class="text-info">Backups Automáticos</h5>
+                                        <p class="text-muted">Se realizan automáticamente cada 30 minutos. Se mantienen los últimos 5 backups.</p>
+                                        <button class="btn btn-info" onclick="mostrarBackupsAutomaticos()">
+                                            <i class="fas fa-clock"></i> Ver Backups Automáticos
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Cierre Diario -->
+    <div class="modal fade" id="modalCierreDiario" tabindex="-1" aria-labelledby="modalCierreDiarioLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCierreDiarioLabel">Cierre Diario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6>Resumen de Ventas</h6>
+                        <div>Total Ventas: <span id="totalVentasHoy">$ 0</span></div>
+                        <div>Efectivo: <span id="totalEfectivoHoy">$ 0</span></div>
+                        <div>Transferencia: <span id="totalTransferenciaHoy">$ 0</span></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Gastos del Día</h6>
+                        <div>Total Gastos: <span id="totalGastos">$ 0</span></div>
+                        <small class="text-muted">Los gastos se toman del sistema de Gastos Diarios</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Balance Final</h6>
+                        <div>Balance: <span id="balanceFinal">$ 0</span></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Detalles Adicionales</label>
+                        <textarea class="form-control bg-dark text-white border-light" id="detallesCierre" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="exportarCierresDiariosExcel()">
+                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="guardarCierreDiario()">Guardar Cierre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Configuración de Cierre -->
+    <div class="modal fade" id="modalConfiguracionCierre" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Configurar Hora de Cierre</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="activarHoraCierre">
+                            <label class="form-check-label" for="activarHoraCierre">
+                                Activar hora de cierre automático
+                            </label>
+                        </div>
+                        <small class="text-muted">Si desactiva esta opción, no habrá restricciones de horario</small>
+                    </div>
+                    <div id="configuracionHora" class="mb-3">
+                        <label class="form-label">Hora de Cierre</label>
+                        <div class="input-group">
+                            <input type="number" id="horaCierre" class="form-control bg-dark text-white border-light" 
+                                   min="1" max="12" value="11" placeholder="Hora (1-12)">
+                            <span class="input-group-text bg-dark text-white border-light">:</span>
+                            <input type="number" id="minutoCierre" class="form-control bg-dark text-white border-light" 
+                                   min="0" max="59" value="30" placeholder="Minutos (0-59)">
+                            <select id="periodoCierre" class="form-select bg-dark text-white border-light">
+                                <option value="AM">AM</option>
+                                <option value="PM" selected>PM</option>
+                            </select>
+                        </div>
+                        <small class="text-muted">Ejemplo: 11:30 PM para cerrar a las 11:30 de la noche</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarConfiguracionCierre()">Guardar</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="seguridad.js"></script>
     <script src="admon.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM cargado, inicializando...');
             verificarAcceso();
             cargarCategorias();
             cargarProductos();
             cargarClientes();
             cargarVentas();
+            
+            // Verificar que el modal existe
+            const modalElement = document.getElementById('modalCierreDiario');
+            console.log('Modal de cierre diario:', modalElement);
+            
+            // Verificar que Bootstrap está disponible
+            console.log('Bootstrap disponible:', typeof bootstrap !== 'undefined');
         });
     </script>
 </body>

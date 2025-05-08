@@ -1525,50 +1525,245 @@ function reimprimirFactura(ventaId) {
 
 // Función para mostrar el modal de cierre diario
 function mostrarModalCierreDiario() {
-  console.log('Intentando mostrar modal de cierre diario');
-  const modalElement = document.getElementById('modalCierreDiario');
-  console.log('Elemento modal:', modalElement);
-  
-  if (!modalElement) {
-    console.error('No se encontró el elemento modalCierreDiario');
-    return;
-  }
-  
-  const modal = new bootstrap.Modal(modalElement);
-  console.log('Modal creado:', modal);
-  
-  // Calcular totales del día
-  const fechaHoy = new Date().toLocaleDateString();
-  const ventasHoy = historialVentas.filter(venta => 
-    new Date(venta.fecha).toLocaleDateString() === fechaHoy
-  );
-  
-  const totalVentas = ventasHoy.reduce((sum, venta) => sum + venta.total, 0);
-  const totalEfectivo = ventasHoy
-    .filter(venta => venta.metodoPago === 'efectivo')
-    .reduce((sum, venta) => sum + venta.total, 0);
-  const totalTransferencia = ventasHoy
-    .filter(venta => venta.metodoPago === 'transferencia')
-    .reduce((sum, venta) => sum + venta.total, 0);
-  
-  // Obtener gastos del día desde el sistema de gastos
-  const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-  const gastosHoy = gastos.filter(g => 
-    new Date(g.fecha).toLocaleDateString() === fechaHoy
-  );
-  
-  const totalGastos = gastosHoy.reduce((sum, g) => sum + g.monto, 0);
-  const balanceFinal = totalVentas - totalGastos;
-  
-  // Actualizar los totales en el modal
-  document.getElementById('totalVentasHoy').textContent = formatearPrecio(totalVentas);
-  document.getElementById('totalEfectivoHoy').textContent = formatearPrecio(totalEfectivo);
-  document.getElementById('totalTransferenciaHoy').textContent = formatearPrecio(totalTransferencia);
-  document.getElementById('totalGastos').textContent = formatearPrecio(totalGastos);
-  document.getElementById('balanceFinal').textContent = formatearPrecio(balanceFinal);
-  
-  console.log('Mostrando modal...');
-  modal.show();
+    const modal = new bootstrap.Modal(document.getElementById('modalCierreDiario'));
+    
+    // Obtener ventas del día
+    const hoy = new Date().toLocaleDateString();
+    const ventasHoy = historialVentas.filter(v => new Date(v.fecha).toLocaleDateString() === hoy);
+    
+    // Calcular totales
+    const totalVentas = ventasHoy.reduce((sum, v) => sum + v.total, 0);
+    const totalEfectivo = ventasHoy.filter(v => v.metodoPago === 'efectivo')
+        .reduce((sum, v) => sum + v.total, 0);
+    const totalTransferencia = ventasHoy.filter(v => v.metodoPago === 'transferencia')
+        .reduce((sum, v) => sum + v.total, 0);
+    
+    // Obtener gastos del día
+    const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+    const gastosHoy = gastos.filter(g => new Date(g.fecha).toLocaleDateString() === hoy);
+    const totalGastos = gastosHoy.reduce((sum, g) => sum + g.monto, 0);
+    
+    // Calcular balance final
+    const balanceFinal = totalVentas - totalGastos;
+    
+    // Actualizar valores en el modal
+    document.getElementById('totalVentasHoy').textContent = `$ ${totalVentas.toLocaleString()}`;
+    document.getElementById('totalEfectivoHoy').textContent = `$ ${totalEfectivo.toLocaleString()}`;
+    document.getElementById('totalTransferenciaHoy').textContent = `$ ${totalTransferencia.toLocaleString()}`;
+    document.getElementById('totalGastos').textContent = `$ ${totalGastos.toLocaleString()}`;
+    document.getElementById('balanceFinal').textContent = `$ ${balanceFinal.toLocaleString()}`;
+    
+    modal.show();
+}
+
+function guardarCierreDiario() {
+    const detalles = document.getElementById('detallesCierre').value;
+    const fecha = new Date().toLocaleDateString();
+    
+    // Obtener datos actuales
+    const cierres = JSON.parse(localStorage.getItem('cierresDiarios')) || [];
+    
+    // Crear nuevo cierre
+    const nuevoCierre = {
+        fecha,
+        totalVentas: parseFloat(document.getElementById('totalVentasHoy').textContent.replace('$', '').replace(',', '')),
+        totalEfectivo: parseFloat(document.getElementById('totalEfectivoHoy').textContent.replace('$', '').replace(',', '')),
+        totalTransferencia: parseFloat(document.getElementById('totalTransferenciaHoy').textContent.replace('$', '').replace(',', '')),
+        totalGastos: parseFloat(document.getElementById('totalGastos').textContent.replace('$', '').replace(',', '')),
+        balanceFinal: parseFloat(document.getElementById('balanceFinal').textContent.replace('$', '').replace(',', '')),
+        detalles
+    };
+    
+    // Agregar nuevo cierre
+    cierres.push(nuevoCierre);
+    
+    // Guardar en localStorage
+    localStorage.setItem('cierresDiarios', JSON.stringify(cierres));
+    
+    // Cerrar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalCierreDiario'));
+    modal.hide();
+    
+    // Mostrar mensaje de éxito
+    alert('Cierre diario guardado exitosamente');
+}
+
+function exportarCierresDiariosExcel() {
+    try {
+        // Obtener cierres diarios
+        const cierres = JSON.parse(localStorage.getItem('cierresDiarios')) || [];
+        
+        if (cierres.length === 0) {
+            alert('No hay cierres diarios para exportar');
+            return;
+        }
+
+        // Crear un nuevo libro de Excel
+        const wb = XLSX.utils.book_new();
+        
+        // Preparar los datos para la hoja de cálculo
+        const datos = cierres.map(cierre => ({
+            'Fecha': cierre.fecha,
+            'Total Ventas': cierre.totalVentas,
+            'Efectivo': cierre.totalEfectivo,
+            'Transferencia': cierre.totalTransferencia,
+            'Gastos': cierre.totalGastos,
+            'Balance Final': cierre.balanceFinal,
+            'Detalles': cierre.detalles || ''
+        }));
+
+        // Crear la hoja de cálculo
+        const ws = XLSX.utils.json_to_sheet(datos);
+
+        // Ajustar el ancho de las columnas
+        const anchos = [
+            { wch: 15 }, // Fecha
+            { wch: 15 }, // Total Ventas
+            { wch: 15 }, // Efectivo
+            { wch: 15 }, // Transferencia
+            { wch: 15 }, // Gastos
+            { wch: 15 }, // Balance Final
+            { wch: 40 }  // Detalles
+        ];
+        ws['!cols'] = anchos;
+
+        // Agregar la hoja al libro
+        XLSX.utils.book_append_sheet(wb, ws, 'Cierres Diarios');
+
+        // Generar el archivo Excel
+        const fecha = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `Cierres_Diarios_${fecha}.xlsx`);
+        
+        alert('Archivo Excel generado exitosamente');
+    } catch (error) {
+        console.error('Error al exportar a Excel:', error);
+        alert('Error al generar el archivo Excel');
+    }
+}
+
+function imprimirBalanceDiario() {
+    try {
+        // Obtener ventas del día
+        const hoy = new Date().toLocaleDateString();
+        const ventasHoy = historialVentas.filter(v => new Date(v.fecha).toLocaleDateString() === hoy);
+        
+        // Calcular totales
+        const totalVentas = ventasHoy.reduce((sum, v) => sum + v.total, 0);
+        const totalEfectivo = ventasHoy.filter(v => v.metodoPago === 'efectivo')
+            .reduce((sum, v) => sum + v.total, 0);
+        const totalTransferencia = ventasHoy.filter(v => v.metodoPago === 'transferencia')
+            .reduce((sum, v) => sum + v.total, 0);
+        
+        // Obtener gastos del día
+        const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+        const gastosHoy = gastos.filter(g => new Date(g.fecha).toLocaleDateString() === hoy);
+        const totalGastos = gastosHoy.reduce((sum, g) => sum + g.monto, 0);
+        
+        // Calcular balance final
+        const balanceFinal = totalVentas - totalGastos;
+
+        // Crear ventana de impresión
+        const ventana = obtenerVentanaImpresion();
+        
+        const contenido = `
+            <html>
+                <head>
+                    <title>Balance Diario</title>
+                    <style>
+                        body { 
+                            font-family: monospace;
+                            font-size: 10px;
+                            width: 80mm;
+                            margin: 0;
+                            padding: 2mm;
+                        }
+                        .text-center { text-align: center; }
+                        .text-right { text-align: right; }
+                        .mb-1 { margin-bottom: 1px; }
+                        .mt-1 { margin-top: 1px; }
+                        .border-top { 
+                            border-top: 1px dashed #000;
+                            margin-top: 2px;
+                            padding-top: 2px;
+                        }
+                        .header {
+                            border-bottom: 1px dashed #000;
+                            padding-bottom: 2px;
+                            margin-bottom: 2px;
+                        }
+                        .total-row {
+                            font-weight: bold;
+                        }
+                        .botones-impresion {
+                            position: fixed;
+                            top: 10px;
+                            right: 10px;
+                            z-index: 1000;
+                        }
+                        .botones-impresion button {
+                            margin-left: 5px;
+                            padding: 5px 10px;
+                            background: #007bff;
+                            color: white;
+                            border: none;
+                            border-radius: 3px;
+                            cursor: pointer;
+                        }
+                        .botones-impresion button:hover {
+                            background: #0056b3;
+                        }
+                        @media print {
+                            .botones-impresion {
+                                display: none;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="botones-impresion">
+                        <button onclick="window.print()">Imprimir</button>
+                        <button onclick="window.close()">Cerrar</button>
+                    </div>
+
+                    <div class="header text-center">
+                        <h2 style="margin: 0; font-size: 14px;">BALANCE DIARIO</h2>
+                        <div class="mb-1">${hoy}</div>
+                    </div>
+                    
+                    <div class="border-top">
+                        <div class="mb-1">Total Ventas: $ ${totalVentas.toLocaleString()}</div>
+                        <div class="mb-1">- Efectivo: $ ${totalEfectivo.toLocaleString()}</div>
+                        <div class="mb-1">- Transferencia: $ ${totalTransferencia.toLocaleString()}</div>
+                    </div>
+                    
+                    <div class="border-top">
+                        <div class="mb-1">Total Gastos: $ ${totalGastos.toLocaleString()}</div>
+                    </div>
+                    
+                    <div class="border-top">
+                        <div class="mb-1 total-row">Balance Final: $ ${balanceFinal.toLocaleString()}</div>
+                    </div>
+
+                    <div class="border-top mt-1">
+                        <div class="mb-1">Detalle de Gastos:</div>
+                        ${gastosHoy.map(gasto => `
+                            <div class="mb-1">- ${gasto.descripcion}: $ ${gasto.monto.toLocaleString()}</div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="text-center mt-1">
+                        <div class="border-top">¡Fin del Balance!</div>
+                    </div>
+                </body>
+            </html>
+        `;
+        
+        ventana.document.write(contenido);
+        ventana.document.close();
+    } catch (error) {
+        console.error('Error al imprimir balance:', error);
+        alert('Error al generar el balance');
+    }
 }
 
 // Función para mostrar historial de ventas
@@ -1663,316 +1858,6 @@ function mostrarModalHistorialCocina() {
 // Función para formatear número
 function formatearNumero(num) {
   return num.toLocaleString('es-CO');
-}
-
-// Función para guardar el cierre diario
-function guardarCierreDiario() {
-  try {
-    const fechaHoy = new Date().toLocaleDateString();
-    const ventasHoy = historialVentas.filter(venta => 
-      new Date(venta.fecha).toLocaleDateString() === fechaHoy
-    );
-    
-    const totalVentas = ventasHoy.reduce((sum, venta) => sum + venta.total, 0);
-    const totalEfectivo = ventasHoy
-      .filter(venta => venta.metodoPago === 'efectivo')
-      .reduce((sum, venta) => sum + venta.total, 0);
-    const totalTransferencia = ventasHoy
-      .filter(venta => venta.metodoPago === 'transferencia')
-      .reduce((sum, venta) => sum + venta.total, 0);
-    
-    // Obtener gastos del día desde el sistema de gastos
-    const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-    const gastosHoy = gastos.filter(g => 
-      new Date(g.fecha).toLocaleDateString() === fechaHoy
-    );
-    
-    const totalGastos = gastosHoy.reduce((sum, g) => sum + g.monto, 0);
-    const balanceFinal = totalVentas - totalGastos;
-    
-    const cierreDiario = {
-      fecha: new Date().toLocaleString(),
-      ventas: {
-        total: totalVentas,
-        efectivo: totalEfectivo,
-        transferencia: totalTransferencia
-      },
-      gastos: {
-        total: totalGastos,
-        detalles: gastosHoy
-      },
-      balance: balanceFinal,
-      detalles: document.getElementById('detallesCierre').value
-    };
-    
-    // Guardar en localStorage
-    const cierresDiarios = JSON.parse(localStorage.getItem('cierresDiarios') || '[]');
-    cierresDiarios.push(cierreDiario);
-    localStorage.setItem('cierresDiarios', JSON.stringify(cierresDiarios));
-    
-    // Imprimir resumen
-    imprimirResumenCierre(cierreDiario);
-
-    // Verificar si XLSX está disponible
-    if (typeof XLSX !== 'undefined') {
-      try {
-        exportarCierreDiarioExcel(cierreDiario, ventasHoy, gastosHoy);
-        alert('Cierre diario guardado y exportado correctamente');
-      } catch (error) {
-        console.error('Error al exportar a Excel:', error);
-        alert('Cierre diario guardado, pero hubo un error al exportar a Excel');
-      }
-    } else {
-      alert('Cierre diario guardado correctamente');
-    }
-    
-    // Cerrar modal
-    const modalCierre = document.getElementById('modalCierreDiario');
-    if (modalCierre) {
-      const modal = bootstrap.Modal.getInstance(modalCierre);
-      if (modal) {
-        modal.hide();
-      }
-    }
-  } catch (error) {
-    console.error('Error al guardar cierre diario:', error);
-    alert('Error al guardar el cierre diario. Por favor, intente nuevamente.');
-  }
-}
-
-// Función para exportar cierre diario a Excel
-function exportarCierreDiarioExcel(cierre, ventas, gastos) {
-  // Crear el contenido del Excel
-  let contenido = [
-    // Hoja 1: Resumen del Cierre
-    {
-      nombre: 'Resumen Cierre',
-      datos: [
-        ['CIERRE DIARIO'],
-        ['Fecha:', cierre.fecha],
-        [''],
-        ['RESUMEN DE VENTAS'],
-        ['Total Ventas:', `$${cierre.ventas.total.toLocaleString()}`],
-        ['- Efectivo:', `$${cierre.ventas.efectivo.toLocaleString()}`],
-        ['- Transferencia:', `$${cierre.ventas.transferencia.toLocaleString()}`],
-        [''],
-        ['GASTOS'],
-        ['Total Gastos:', `$${cierre.gastos.total.toLocaleString()}`],
-        [''],
-        ['BALANCE FINAL:', `$${cierre.balance.toLocaleString()}`],
-        [''],
-        ['Detalles:', cierre.detalles]
-      ]
-    },
-    // Hoja 2: Detalle de Ventas
-    {
-      nombre: 'Detalle Ventas',
-      datos: [
-        ['FECHA', 'TIPO', 'CLIENTE', 'TOTAL', 'MÉTODO DE PAGO'],
-        ...ventas.map(venta => [
-          venta.fecha,
-          venta.mesa.startsWith('DOM-') ? 'Domicilio' : 
-          venta.mesa.startsWith('REC-') ? 'Recoger' : 'Mesa',
-          venta.cliente || '-',
-          venta.total,
-          venta.metodoPago
-        ]),
-        ['', '', 'TOTAL VENTAS:', cierre.ventas.total, '']
-      ]
-    },
-    // Hoja 3: Detalle de Gastos
-    {
-      nombre: 'Detalle Gastos',
-      datos: [
-        ['FECHA', 'CONCEPTO', 'MONTO', 'CATEGORÍA'],
-        ...gastos.map(gasto => [
-          new Date(gasto.fecha).toLocaleString(),
-          gasto.descripcion,
-          gasto.monto,
-          gasto.categoria
-        ]),
-        ['', '', 'TOTAL GASTOS:', cierre.gastos.total, '']
-      ]
-    }
-  ];
-
-  // Crear el archivo Excel
-  const wb = XLSX.utils.book_new();
-  
-  contenido.forEach(hoja => {
-    const ws = XLSX.utils.aoa_to_sheet(hoja.datos);
-    
-    // Aplicar estilos a todas las hojas
-    const wscols = [
-      {wch: 20}, // Fecha
-      {wch: 30}, // Concepto/Cliente
-      {wch: 15}, // Monto
-      {wch: 20}  // Categoría/Método
-    ];
-    ws['!cols'] = wscols;
-
-    // Estilo para los encabezados
-    const headerStyle = {
-      font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "4472C4" } },
-      alignment: { horizontal: "center" }
-    };
-
-    // Aplicar estilo a los encabezados
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellRef = XLSX.utils.encode_cell({r: 0, c: C});
-      if (!ws[cellRef]) continue;
-      ws[cellRef].s = headerStyle;
-    }
-
-    // Formatear números en la hoja de ventas
-    if (hoja.nombre === 'Detalle Ventas') {
-      for (let i = 1; i < hoja.datos.length; i++) {
-        const cellRef = XLSX.utils.encode_cell({r: i, c: 3});
-        if (ws[cellRef]) {
-          ws[cellRef].z = '"$"#,##0';
-          if (i === hoja.datos.length - 1) {
-            ws[cellRef].s = { font: { bold: true } };
-          }
-        }
-      }
-    }
-
-    // Formatear números en la hoja de gastos
-    if (hoja.nombre === 'Detalle Gastos') {
-      for (let i = 1; i < hoja.datos.length; i++) {
-        const cellRef = XLSX.utils.encode_cell({r: i, c: 2});
-        if (ws[cellRef]) {
-          ws[cellRef].z = '"$"#,##0';
-          if (i === hoja.datos.length - 1) {
-            ws[cellRef].s = { font: { bold: true } };
-          }
-        }
-      }
-    }
-
-    // Formatear números en la hoja de resumen
-    if (hoja.nombre === 'Resumen Cierre') {
-      const montos = [4, 5, 6, 9, 11]; // Índices de las filas con montos
-      montos.forEach(row => {
-        const cellRef = XLSX.utils.encode_cell({r: row, c: 1});
-        if (ws[cellRef]) {
-          ws[cellRef].z = '"$"#,##0';
-          if (row === 11) { // Balance Final
-            ws[cellRef].s = { font: { bold: true } };
-          }
-        }
-      });
-    }
-    
-    XLSX.utils.book_append_sheet(wb, ws, hoja.nombre);
-  });
-
-  // Generar el archivo y descargarlo
-  const fecha = new Date().toLocaleDateString().replace(/\//g, '-');
-  XLSX.writeFile(wb, `Cierre_Diario_${fecha}.xlsx`);
-}
-
-// Función para imprimir el resumen del cierre
-function imprimirResumenCierre(cierre) {
-  const ventana = obtenerVentanaImpresion();
-  
-  const contenido = `
-    <html>
-      <head>
-        <title>Resumen Cierre Diario</title>
-        <style>
-          body { 
-            font-family: monospace;
-            font-size: 10px;
-            width: 80mm;
-            margin: 0;
-            padding: 2mm;
-          }
-          .text-center { text-align: center; }
-          .text-right { text-align: right; }
-          .mb-1 { margin-bottom: 1px; }
-          .mt-1 { margin-top: 1px; }
-          .border-top { 
-            border-top: 1px dashed #000;
-            margin-top: 2px;
-            padding-top: 2px;
-          }
-          .header {
-            border-bottom: 1px dashed #000;
-            padding-bottom: 2px;
-            margin-bottom: 2px;
-          }
-          .total-row {
-            font-weight: bold;
-          }
-          .botones-impresion {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-          }
-          .botones-impresion button {
-            margin-left: 5px;
-            padding: 5px 10px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-          }
-          .botones-impresion button:hover {
-            background: #0056b3;
-          }
-          @media print {
-            .botones-impresion {
-              display: none;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="botones-impresion">
-          <button onclick="window.print()">Imprimir</button>
-          <button onclick="window.close()">Cerrar</button>
-        </div>
-
-        <div class="header text-center">
-          <h2 style="margin: 0; font-size: 14px;">CIERRE DIARIO</h2>
-          <div class="mb-1">${cierre.fecha}</div>
-        </div>
-        
-        <div class="border-top">
-          <div class="mb-1">Ventas Totales: $ ${formatearNumero(cierre.ventas.total)}</div>
-          <div class="mb-1">- Efectivo: $ ${formatearNumero(cierre.ventas.efectivo)}</div>
-          <div class="mb-1">- Transferencia: $ ${formatearNumero(cierre.ventas.transferencia)}</div>
-        </div>
-        
-        <div class="border-top">
-          <div class="mb-1">Gastos Totales: $ ${formatearNumero(cierre.gastos.total)}</div>
-        </div>
-        
-        <div class="border-top total-row">
-          <div class="mb-1">Balance Final: $ ${formatearNumero(cierre.balance)}</div>
-        </div>
-        
-        ${cierre.detalles ? `
-          <div class="border-top">
-            <div class="mb-1">Detalles:</div>
-            <div class="mb-1">${cierre.detalles}</div>
-          </div>
-        ` : ''}
-        
-        <div class="text-center mt-1">
-          <div class="border-top">¡Fin del día!</div>
-        </div>
-      </body>
-    </html>
-  `;
-  
-  ventana.document.write(contenido);
-  ventana.document.close();
 }
 
 // Función para inicializar WhatsApp Web
@@ -2074,4 +1959,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Función para mostrar el modal de configuración de cierre
+function mostrarModalConfiguracionCierre() {
+    const modal = new bootstrap.Modal(document.getElementById('modalConfiguracionCierre'));
+    
+    // Cargar la configuración actual
+    const configGuardada = JSON.parse(localStorage.getItem('configuracionCierre') || '{}');
+    
+    document.getElementById('horaCierre').value = configGuardada.horaCierre || 11;
+    document.getElementById('minutoCierre').value = configGuardada.minutoCierre || 30;
+    document.getElementById('periodoCierre').value = configGuardada.periodo || 'PM';
+    document.getElementById('activarHoraCierre').checked = configGuardada.activo || false;
+    
+    modal.show();
+}
+
+// Función para guardar la configuración de cierre
+function guardarConfiguracionCierre() {
+    const hora = parseInt(document.getElementById('horaCierre').value);
+    const minuto = parseInt(document.getElementById('minutoCierre').value);
+    const periodo = document.getElementById('periodoCierre').value;
+    const activo = document.getElementById('activarHoraCierre').checked;
+
+    if (hora < 1 || hora > 12) {
+        alert('Por favor, ingrese una hora válida (1-12)');
+        return;
+    }
+
+    if (minuto < 0 || minuto > 59) {
+        alert('Por favor, ingrese minutos válidos (0-59)');
+        return;
+    }
+
+    configurarHoraCierre(hora, minuto, periodo, activo);
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfiguracionCierre'));
+    modal.hide();
+
+    if (activo) {
+        alert(`Hora de cierre configurada: ${hora}:${minuto.toString().padStart(2, '0')} ${periodo}`);
+    } else {
+        alert('Configuración de hora de cierre desactivada. No habrá restricciones de horario.');
+    }
+}
   

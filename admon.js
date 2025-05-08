@@ -4,6 +4,11 @@ window.productos = JSON.parse(localStorage.getItem('productos')) || [];
 window.ventas = JSON.parse(localStorage.getItem('ventas')) || [];
 window.clientes = JSON.parse(localStorage.getItem('clientes')) || [];
 
+// Variables para backup automático
+const MAX_BACKUPS = 3; // Reducido a 3 backups
+const BACKUP_INTERVAL = 60 * 60 * 1000; // 1 hora en lugar de 30 minutos
+const MAX_VENTAS_BACKUP = 100; // Solo guardar las últimas 100 ventas en el backup
+
 // Variables globales para paginación
 let paginaActualClientes = 1;
 let paginaActualProductos = 1;
@@ -11,6 +16,193 @@ let clientesPorPagina = 10;
 let productosPorPagina = 10;
 let clientesFiltrados = [];
 let productosFiltrados = [];
+
+// Funciones de Backup y Restauración
+function crearBackup() {
+    // Crear una copia de las ventas limitada a las últimas MAX_VENTAS_BACKUP
+    const ventasLimitadas = window.ventas.slice(-MAX_VENTAS_BACKUP);
+    
+    const datos = {
+        categorias: window.categorias,
+        productos: window.productos,
+        clientes: window.clientes,
+        ventas: ventasLimitadas,
+        fecha: new Date().toISOString()
+    };
+    return datos;
+}
+
+function guardarBackupAutomatico() {
+    try {
+        const backups = JSON.parse(localStorage.getItem('backups_automaticos')) || [];
+        const nuevoBackup = crearBackup();
+        
+        // Verificar el tamaño del nuevo backup
+        const backupSize = new Blob([JSON.stringify(nuevoBackup)]).size;
+        const maxSize = 2 * 1024 * 1024; // 2MB límite
+        
+        if (backupSize > maxSize) {
+            console.warn('El backup es demasiado grande, se omitirá');
+            return;
+        }
+        
+        backups.unshift(nuevoBackup);
+        if (backups.length > MAX_BACKUPS) {
+            backups.pop();
+        }
+        
+        localStorage.setItem('backups_automaticos', JSON.stringify(backups));
+    } catch (error) {
+        console.error('Error al guardar backup automático:', error);
+    }
+}
+
+function iniciarBackupAutomatico() {
+    // Realizar un backup inicial
+    guardarBackupAutomatico();
+    
+    // Configurar el intervalo
+    setInterval(guardarBackupAutomatico, BACKUP_INTERVAL);
+}
+
+function exportarDatos() {
+    const datos = crearBackup();
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_pos_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function validarDatos(datos) {
+    const errores = [];
+    
+    // Validar estructura básica
+    if (!datos.categorias || !Array.isArray(datos.categorias)) errores.push('Categorías inválidas');
+    if (!datos.productos || !Array.isArray(datos.productos)) errores.push('Productos inválidos');
+    if (!datos.clientes || !Array.isArray(datos.clientes)) errores.push('Clientes inválidos');
+    if (!datos.ventas || !Array.isArray(datos.ventas)) errores.push('Ventas inválidas');
+    
+    // Validar datos de productos
+    if (datos.productos) {
+        datos.productos.forEach((producto, index) => {
+            if (!producto.nombre || !producto.precio || !producto.categoria) {
+                errores.push(`Producto ${index + 1} incompleto`);
+            }
+        });
+    }
+    
+    // Validar datos de clientes
+    if (datos.clientes) {
+        datos.clientes.forEach((cliente, index) => {
+            if (!cliente.nombre || !cliente.telefono) {
+                errores.push(`Cliente ${index + 1} incompleto`);
+            }
+        });
+    }
+    
+    return errores;
+}
+
+function mostrarResumenDatos(datos) {
+    const resumen = `
+        Categorías: ${datos.categorias.length}
+        Productos: ${datos.productos.length}
+        Clientes: ${datos.clientes.length}
+        Ventas: ${datos.ventas.length}
+        Fecha: ${new Date(datos.fecha).toLocaleString()}
+    `;
+    return resumen;
+}
+
+function importarDatos(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const datos = JSON.parse(e.target.result);
+            
+            // Validar datos
+            const errores = validarDatos(datos);
+            if (errores.length > 0) {
+                throw new Error('Errores en los datos:\n' + errores.join('\n'));
+            }
+
+            // Mostrar resumen y pedir confirmación
+            const resumen = mostrarResumenDatos(datos);
+            if (confirm(`¿Estás seguro de que deseas restaurar estos datos?\n\n${resumen}\n\nSe sobrescribirán los datos actuales.`)) {
+                // Restaurar datos
+                window.categorias = datos.categorias;
+                window.productos = datos.productos;
+                window.clientes = datos.clientes;
+                window.ventas = datos.ventas;
+
+                // Guardar en localStorage
+                localStorage.setItem('categorias', JSON.stringify(window.categorias));
+                localStorage.setItem('productos', JSON.stringify(window.productos));
+                localStorage.setItem('clientes', JSON.stringify(window.clientes));
+                localStorage.setItem('ventas', JSON.stringify(window.ventas));
+
+                // Recargar la interfaz
+                cargarCategorias();
+                cargarProductos();
+                cargarClientes();
+                cargarVentas();
+
+                alert('Datos restaurados exitosamente');
+            }
+        } catch (error) {
+            alert('Error al importar los datos: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function mostrarBackupsAutomaticos() {
+    const backups = JSON.parse(localStorage.getItem('backups_automaticos')) || [];
+    if (backups.length === 0) {
+        alert('No hay backups automáticos disponibles');
+        return;
+    }
+
+    const opciones = backups.map((backup, index) => {
+        const fecha = new Date(backup.fecha).toLocaleString();
+        return `${index + 1}. ${fecha} (${backup.productos.length} productos, ${backup.clientes.length} clientes)`;
+    }).join('\n');
+
+    const seleccion = prompt(`Seleccione un backup para restaurar (1-${backups.length}):\n\n${opciones}`);
+    const indice = parseInt(seleccion) - 1;
+
+    if (indice >= 0 && indice < backups.length) {
+        const backup = backups[indice];
+        const resumen = mostrarResumenDatos(backup);
+        
+        if (confirm(`¿Restaurar este backup?\n\n${resumen}`)) {
+            window.categorias = backup.categorias;
+            window.productos = backup.productos;
+            window.clientes = backup.clientes;
+            window.ventas = backup.ventas;
+
+            localStorage.setItem('categorias', JSON.stringify(window.categorias));
+            localStorage.setItem('productos', JSON.stringify(window.productos));
+            localStorage.setItem('clientes', JSON.stringify(window.clientes));
+            localStorage.setItem('ventas', JSON.stringify(window.ventas));
+
+            cargarCategorias();
+            cargarProductos();
+            cargarClientes();
+            cargarVentas();
+
+            alert('Backup restaurado exitosamente');
+        }
+    }
+}
 
 // Inicialización
 window.onload = function() {
@@ -23,6 +215,9 @@ window.onload = function() {
     cargarProductos();
     cargarClientes();
     cargarVentas();
+    
+    // Iniciar backup automático
+    iniciarBackupAutomatico();
 };
 
 // Funciones para Categorías
@@ -394,42 +589,176 @@ function modificarCliente(id) {
 }
 
 // Funciones para Cierre Diario
-window.generarCierreDiario = function() {
-    const fecha = document.getElementById('fechaCierre').value;
-    if (!fecha) {
-        alert('Por favor seleccione una fecha');
-        return;
+function mostrarModalCierreDiario() {
+    try {
+        console.log('Iniciando mostrarModalCierreDiario...');
+        
+        // Verificar que Bootstrap está disponible
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap no está disponible');
+            alert('Error: Bootstrap no está disponible');
+            return;
+        }
+        
+        // Obtener el elemento del modal
+        const modalElement = document.getElementById('modalCierreDiario');
+        console.log('Elemento del modal:', modalElement);
+        
+        if (!modalElement) {
+            console.error('No se encontró el elemento modal');
+            alert('Error: No se encontró el modal de cierre diario');
+            return;
+        }
+
+        // Verificar que el modal está en el DOM
+        if (!document.body.contains(modalElement)) {
+            console.error('El modal no está en el DOM');
+            alert('Error: El modal no está en el DOM');
+            return;
+        }
+
+        // Crear la instancia del modal
+        console.log('Creando instancia del modal...');
+        const modal = new bootstrap.Modal(modalElement);
+        
+        // Obtener ventas del día
+        console.log('Obteniendo ventas del día...');
+        const ventas = JSON.parse(localStorage.getItem('ventas')) || [];
+        const hoy = new Date().toLocaleDateString();
+        const ventasHoy = ventas.filter(v => new Date(v.fecha).toLocaleDateString() === hoy);
+        
+        // Calcular totales
+        console.log('Calculando totales...');
+        const totalVentas = ventasHoy.reduce((sum, v) => sum + v.total, 0);
+        const totalEfectivo = ventasHoy.filter(v => v.metodoPago === 'efectivo')
+            .reduce((sum, v) => sum + v.total, 0);
+        const totalTransferencia = ventasHoy.filter(v => v.metodoPago === 'transferencia')
+            .reduce((sum, v) => sum + v.total, 0);
+        
+        // Obtener gastos del día
+        console.log('Obteniendo gastos del día...');
+        const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+        const gastosHoy = gastos.filter(g => new Date(g.fecha).toLocaleDateString() === hoy);
+        const totalGastos = gastosHoy.reduce((sum, g) => sum + g.monto, 0);
+        
+        // Calcular balance final
+        const balanceFinal = totalVentas - totalGastos;
+        
+        // Actualizar valores en el modal
+        console.log('Actualizando valores en el modal...');
+        document.getElementById('totalVentasHoy').textContent = `$ ${totalVentas.toLocaleString()}`;
+        document.getElementById('totalEfectivoHoy').textContent = `$ ${totalEfectivo.toLocaleString()}`;
+        document.getElementById('totalTransferenciaHoy').textContent = `$ ${totalTransferencia.toLocaleString()}`;
+        document.getElementById('totalGastos').textContent = `$ ${totalGastos.toLocaleString()}`;
+        document.getElementById('balanceFinal').textContent = `$ ${balanceFinal.toLocaleString()}`;
+        
+        // Limpiar detalles
+        document.getElementById('detallesCierre').value = '';
+        
+        // Mostrar el modal
+        console.log('Mostrando el modal...');
+        modal.show();
+        console.log('Modal mostrado correctamente');
+    } catch (error) {
+        console.error('Error al mostrar el modal:', error);
+        alert('Error al mostrar el modal de cierre diario: ' + error.message);
     }
+}
 
-    const ventasDia = window.ventas.filter(v => {
-        const ventaFecha = new Date(v.fecha).toISOString().split('T')[0];
-        return ventaFecha === fecha;
-    });
+function guardarCierreDiario() {
+    const detalles = document.getElementById('detallesCierre').value;
+    const fecha = new Date().toLocaleDateString();
+    
+    // Obtener datos actuales
+    const cierres = JSON.parse(localStorage.getItem('cierresDiarios')) || [];
+    
+    // Crear nuevo cierre
+    const nuevoCierre = {
+        fecha,
+        totalVentas: parseFloat(document.getElementById('totalVentasHoy').textContent.replace('$', '').replace(',', '')),
+        totalEfectivo: parseFloat(document.getElementById('totalEfectivoHoy').textContent.replace('$', '').replace(',', '')),
+        totalTransferencia: parseFloat(document.getElementById('totalTransferenciaHoy').textContent.replace('$', '').replace(',', '')),
+        totalGastos: parseFloat(document.getElementById('totalGastos').textContent.replace('$', '').replace(',', '')),
+        balanceFinal: parseFloat(document.getElementById('balanceFinal').textContent.replace('$', '').replace(',', '')),
+        detalles
+    };
+    
+    // Agregar nuevo cierre
+    cierres.push(nuevoCierre);
+    
+    // Guardar en localStorage
+    localStorage.setItem('cierresDiarios', JSON.stringify(cierres));
+    
+    // Cerrar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalCierreDiario'));
+    modal.hide();
+    
+    // Mostrar mensaje de éxito
+    alert('Cierre diario guardado exitosamente');
+}
 
-    const totalDia = ventasDia.reduce((sum, v) => sum + v.total, 0);
-    document.getElementById('totalDia').textContent = `$${totalDia}`;
+// Función para exportar cierres diarios a Excel
+function exportarCierresDiariosExcel() {
+    try {
+        // Obtener todos los cierres
+        const cierres = JSON.parse(localStorage.getItem('cierresDiarios')) || [];
+        
+        if (cierres.length === 0) {
+            alert('No hay cierres diarios para exportar');
+            return;
+        }
 
-    // Exportar cierre diario
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(ventasDia.map(v => ({
-        Fecha: new Date(v.fecha).toLocaleString(),
-        Mesa: v.mesa,
-        Total: v.total
-    })));
-    XLSX.utils.book_append_sheet(wb, ws, "Cierre Diario");
-    XLSX.writeFile(wb, `cierre_diario_${fecha}.xlsx`);
-};
-
-window.exportarHistorial = function() {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(window.ventas.map(v => ({
-        Fecha: new Date(v.fecha).toLocaleString(),
-        Mesa: v.mesa,
-        Total: v.total
-    })));
-    XLSX.utils.book_append_sheet(wb, ws, "Historial");
-    XLSX.writeFile(wb, "historial_ventas.xlsx");
-};
+        // Crear un nuevo libro de Excel
+        const wb = XLSX.utils.book_new();
+        
+        // Crear los datos para la hoja de cálculo
+        const datos = [
+            ['CIERRES DIARIOS'],
+            [''],
+            ['Fecha', 'Total Ventas', 'Efectivo', 'Transferencia', 'Gastos', 'Balance Final', 'Detalles']
+        ];
+        
+        // Agregar cada cierre como una fila
+        cierres.forEach(cierre => {
+            datos.push([
+                cierre.fecha,
+                `$ ${cierre.totalVentas.toLocaleString()}`,
+                `$ ${cierre.totalEfectivo.toLocaleString()}`,
+                `$ ${cierre.totalTransferencia.toLocaleString()}`,
+                `$ ${cierre.totalGastos.toLocaleString()}`,
+                `$ ${cierre.balanceFinal.toLocaleString()}`,
+                cierre.detalles || ''
+            ]);
+        });
+        
+        // Crear la hoja de cálculo
+        const ws = XLSX.utils.aoa_to_sheet(datos);
+        
+        // Ajustar el ancho de las columnas
+        const wscols = [
+            {wch: 15}, // Fecha
+            {wch: 15}, // Total Ventas
+            {wch: 15}, // Efectivo
+            {wch: 15}, // Transferencia
+            {wch: 15}, // Gastos
+            {wch: 15}, // Balance Final
+            {wch: 40}  // Detalles
+        ];
+        ws['!cols'] = wscols;
+        
+        // Agregar la hoja al libro
+        XLSX.utils.book_append_sheet(wb, ws, 'Cierres Diarios');
+        
+        // Generar el archivo Excel
+        const fechaFormateada = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `Cierres_Diarios_${fechaFormateada}.xlsx`);
+        
+        alert('Archivo Excel generado exitosamente');
+    } catch (error) {
+        console.error('Error al exportar a Excel:', error);
+        alert('Error al generar el archivo Excel. Por favor, intente nuevamente.');
+    }
+}
 
 // Funciones de búsqueda y filtrado
 function filtrarClientes() {
@@ -497,4 +826,84 @@ function generarPaginacion(elementoId, totalPaginas, paginaActual, funcionCambio
         <a class="page-link" href="#" onclick="event.preventDefault(); ${funcionCambio.name}(${paginaActual + 1})">Siguiente</a>
     `;
     paginacion.appendChild(liSiguiente);
+}
+
+function abrirWhatsAppFlotante() {
+  window.open(
+    'https://web.whatsapp.com/',
+    'WhatsAppWeb',
+    'width=500,height=700,left=200,top=100'
+  );
+}
+
+function enviarMensajeWhatsApp() {
+  const numero = document.getElementById('numeroWhatsapp').value.trim();
+  const mensaje = encodeURIComponent(document.getElementById('mensajeWhatsapp').value.trim());
+  if (!numero) {
+    alert('Por favor ingresa el número de WhatsApp del cliente.');
+    return;
+  }
+  window.open(`https://wa.me/${numero}?text=${mensaje}`, '_blank');
+}
+
+// Función para mostrar el modal de configuración de cierre
+function mostrarModalConfiguracionCierre() {
+    const modal = new bootstrap.Modal(document.getElementById('modalConfiguracionCierre'));
+    
+    // Cargar la configuración actual
+    const configGuardada = JSON.parse(localStorage.getItem('configuracionCierre') || '{}');
+    
+    document.getElementById('horaCierre').value = configGuardada.horaCierre || 11;
+    document.getElementById('minutoCierre').value = configGuardada.minutoCierre || 30;
+    document.getElementById('periodoCierre').value = configGuardada.periodo || 'PM';
+    document.getElementById('activarHoraCierre').checked = configGuardada.activo || false;
+    
+    modal.show();
+}
+
+// Función para guardar la configuración de cierre
+function guardarConfiguracionCierre() {
+    const hora = parseInt(document.getElementById('horaCierre').value);
+    const minuto = parseInt(document.getElementById('minutoCierre').value);
+    const periodo = document.getElementById('periodoCierre').value;
+    const activo = document.getElementById('activarHoraCierre').checked;
+
+    if (hora < 1 || hora > 12) {
+        alert('Por favor, ingrese una hora válida (1-12)');
+        return;
+    }
+
+    if (minuto < 0 || minuto > 59) {
+        alert('Por favor, ingrese minutos válidos (0-59)');
+        return;
+    }
+
+    // Guardar la configuración
+    const configuracion = {
+        horaCierre: hora,
+        minutoCierre: minuto,
+        periodo: periodo,
+        activo: activo
+    };
+    
+    localStorage.setItem('configuracionCierre', JSON.stringify(configuracion));
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfiguracionCierre'));
+    modal.hide();
+
+    if (activo) {
+        alert(`Hora de cierre configurada: ${hora}:${minuto.toString().padStart(2, '0')} ${periodo}`);
+    } else {
+        alert('Configuración de hora de cierre desactivada. No habrá restricciones de horario.');
+    }
+}
+
+// Función para extender el horario
+function extenderHorario() {
+    if (confirm('¿Desea extender el horario para permitir más clientes?')) {
+        const configuracion = JSON.parse(localStorage.getItem('configuracionCierre') || '{}');
+        configuracion.horarioExtendido = true;
+        localStorage.setItem('configuracionCierre', JSON.stringify(configuracion));
+        alert('Horario extendido exitosamente');
+    }
 } 
