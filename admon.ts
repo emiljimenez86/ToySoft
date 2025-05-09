@@ -77,17 +77,42 @@ function modificarCliente(id: number): void {
     const cliente: Cliente | undefined = clientes.find(c => c.id === id);
     if (!cliente) return;
 
-    const nuevoNombre: string | null = prompt('Ingrese el nuevo nombre:', cliente.nombre);
-    if (!nuevoNombre) return;
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarCliente')!);
+    const idInput = document.getElementById('clienteIdModificar') as HTMLInputElement;
+    const nombreInput = document.getElementById('nombreClienteModificar') as HTMLInputElement;
+    const telefonoInput = document.getElementById('telefonoClienteModificar') as HTMLInputElement;
 
-    const nuevoTelefono: string | null = prompt('Ingrese el nuevo teléfono:', cliente.telefono);
-    if (!nuevoTelefono) return;
+    idInput.value = id.toString();
+    nombreInput.value = cliente.nombre;
+    telefonoInput.value = cliente.telefono;
 
-    cliente.nombre = nuevoNombre;
-    cliente.telefono = nuevoTelefono;
+    modal.show();
+}
 
-    localStorage.setItem('clientes', JSON.stringify(clientes));
-    cargarClientes();
+function guardarModificacionCliente(): void {
+    const idInput = document.getElementById('clienteIdModificar') as HTMLInputElement;
+    const nombreInput = document.getElementById('nombreClienteModificar') as HTMLInputElement;
+    const telefonoInput = document.getElementById('telefonoClienteModificar') as HTMLInputElement;
+
+    const id = parseInt(idInput.value);
+    const nombre = nombreInput.value.trim();
+    const telefono = telefonoInput.value.trim();
+
+    if (!nombre || !telefono) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+
+    const cliente = clientes.find(c => c.id === id);
+    if (cliente) {
+        cliente.nombre = nombre;
+        cliente.telefono = telefono;
+        localStorage.setItem('clientes', JSON.stringify(clientes));
+        cargarClientes();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarCliente')!);
+        modal?.hide();
+    }
 }
 
 // Funciones para Categorías
@@ -174,15 +199,34 @@ function cargarCategorias(): void {
 }
 
 function modificarCategoria(nombreActual: string): void {
-    const nuevoNombre: string | null = prompt('Ingrese el nuevo nombre para la categoría:', nombreActual);
-    if (!nuevoNombre) return;
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarCategoria')!);
+    const categoriaActualInput = document.getElementById('categoriaActualModificar') as HTMLInputElement;
+    const nombreInput = document.getElementById('nombreCategoriaModificar') as HTMLInputElement;
 
-    if (categorias.includes(nuevoNombre)) {
+    categoriaActualInput.value = nombreActual;
+    nombreInput.value = nombreActual;
+
+    modal.show();
+}
+
+function guardarModificacionCategoria(): void {
+    const categoriaActualInput = document.getElementById('categoriaActualModificar') as HTMLInputElement;
+    const nombreInput = document.getElementById('nombreCategoriaModificar') as HTMLInputElement;
+
+    const nombreActual = categoriaActualInput.value;
+    const nuevoNombre = nombreInput.value.trim();
+
+    if (!nuevoNombre) {
+        alert('Por favor ingrese un nombre para la categoría');
+        return;
+    }
+
+    if (categorias.includes(nuevoNombre) && nuevoNombre !== nombreActual) {
         alert('Esta categoría ya existe');
         return;
     }
 
-    const index: number = categorias.indexOf(nombreActual);
+    const index = categorias.indexOf(nombreActual);
     if (index !== -1) {
         productos.forEach(producto => {
             if (producto.categoria === nombreActual) {
@@ -195,6 +239,9 @@ function modificarCategoria(nombreActual: string): void {
         localStorage.setItem('productos', JSON.stringify(productos));
         cargarCategorias();
         cargarProductos();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarCategoria')!);
+        modal?.hide();
     }
 }
 
@@ -274,27 +321,58 @@ function modificarProducto(id: number): void {
     const producto: Producto | undefined = productos.find(p => p.id === id);
     if (!producto) return;
 
-    const nuevoNombre: string | null = prompt('Ingrese el nuevo nombre:', producto.nombre);
-    if (!nuevoNombre) return;
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarProducto')!);
+    const idInput = document.getElementById('productoIdModificar') as HTMLInputElement;
+    const nombreInput = document.getElementById('nombreProductoModificar') as HTMLInputElement;
+    const precioInput = document.getElementById('precioProductoModificar') as HTMLInputElement;
+    const categoriaSelect = document.getElementById('categoriaProductoModificar') as HTMLSelectElement;
 
-    const nuevoPrecio: string | null = prompt('Ingrese el nuevo precio:', producto.precio.toString());
-    if (!nuevoPrecio || isNaN(parseFloat(nuevoPrecio))) {
-        alert('Por favor ingrese un precio válido');
+    // Llenar el select de categorías
+    categoriaSelect.innerHTML = '<option value="">Seleccionar categoría</option>';
+    categorias.forEach(categoria => {
+        const option = document.createElement('option');
+        option.value = categoria;
+        option.textContent = categoria;
+        if (categoria === producto.categoria) {
+            option.selected = true;
+        }
+        categoriaSelect.appendChild(option);
+    });
+
+    idInput.value = id.toString();
+    nombreInput.value = producto.nombre;
+    precioInput.value = producto.precio.toString();
+
+    modal.show();
+}
+
+function guardarModificacionProducto(): void {
+    const idInput = document.getElementById('productoIdModificar') as HTMLInputElement;
+    const nombreInput = document.getElementById('nombreProductoModificar') as HTMLInputElement;
+    const precioInput = document.getElementById('precioProductoModificar') as HTMLInputElement;
+    const categoriaSelect = document.getElementById('categoriaProductoModificar') as HTMLSelectElement;
+
+    const id = parseInt(idInput.value);
+    const nombre = nombreInput.value.trim();
+    const precio = parseInt(precioInput.value);
+    const categoria = categoriaSelect.value;
+
+    if (!nombre || !precio || !categoria) {
+        alert('Por favor complete todos los campos');
         return;
     }
 
-    const nuevaCategoria: string | null = prompt('Ingrese la nueva categoría:', producto.categoria);
-    if (!nuevaCategoria || !categorias.includes(nuevaCategoria)) {
-        alert('Por favor ingrese una categoría válida');
-        return;
+    const producto = productos.find(p => p.id === id);
+    if (producto) {
+        producto.nombre = nombre;
+        producto.precio = precio;
+        producto.categoria = categoria;
+        localStorage.setItem('productos', JSON.stringify(productos));
+        cargarProductos();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarProducto')!);
+        modal?.hide();
     }
-
-    producto.nombre = nuevoNombre;
-    producto.precio = parseFloat(nuevoPrecio);
-    producto.categoria = nuevaCategoria;
-
-    localStorage.setItem('productos', JSON.stringify(productos));
-    cargarProductos();
 }
 
 // Funciones para Ventas

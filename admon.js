@@ -509,20 +509,92 @@ function eliminarCliente() {
 }
 
 // Funciones de modificación
-function modificarCategoria(nombreActual) {
-    const nuevoNombre = prompt('Ingrese el nuevo nombre para la categoría:', nombreActual);
-    if (!nuevoNombre) return;
+function modificarCliente(id) {
+    const cliente = window.clientes.find(c => c.id === id);
+    if (!cliente) return;
 
-    if (window.categorias.includes(nuevoNombre)) {
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarCliente'));
+    const idInput = document.getElementById('clienteIdModificar');
+    const nombreInput = document.getElementById('nombreClienteModificar');
+    const telefonoInput = document.getElementById('telefonoClienteModificar');
+
+    idInput.value = id;
+    nombreInput.value = cliente.nombre;
+    telefonoInput.value = cliente.telefono;
+
+    modal.show();
+}
+
+function guardarModificacionCliente() {
+    const idInput = document.getElementById('clienteIdModificar');
+    const nombreInput = document.getElementById('nombreClienteModificar');
+    const telefonoInput = document.getElementById('telefonoClienteModificar');
+
+    const id = parseInt(idInput.value);
+    const nombre = nombreInput.value.trim();
+    const telefono = telefonoInput.value.trim();
+
+    if (!nombre || !telefono) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+
+    const cliente = window.clientes.find(c => c.id === id);
+    if (cliente) {
+        cliente.nombre = nombre;
+        cliente.telefono = telefono;
+        localStorage.setItem('clientes', JSON.stringify(window.clientes));
+        cargarClientes();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarCliente'));
+        modal.hide();
+    }
+}
+
+function modificarCategoria(nombreActual) {
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarCategoria'));
+    const categoriaActualInput = document.getElementById('categoriaActualModificar');
+    const nombreInput = document.getElementById('nombreCategoriaModificar');
+
+    categoriaActualInput.value = nombreActual;
+    nombreInput.value = nombreActual;
+
+    modal.show();
+}
+
+function guardarModificacionCategoria() {
+    const categoriaActualInput = document.getElementById('categoriaActualModificar');
+    const nombreInput = document.getElementById('nombreCategoriaModificar');
+
+    const nombreActual = categoriaActualInput.value;
+    const nuevoNombre = nombreInput.value.trim();
+
+    if (!nuevoNombre) {
+        alert('Por favor ingrese un nombre para la categoría');
+        return;
+    }
+
+    if (window.categorias.includes(nuevoNombre) && nuevoNombre !== nombreActual) {
         alert('Esta categoría ya existe');
         return;
     }
 
     const index = window.categorias.indexOf(nombreActual);
     if (index !== -1) {
+        window.productos.forEach(producto => {
+            if (producto.categoria === nombreActual) {
+                producto.categoria = nuevoNombre;
+            }
+        });
+
         window.categorias[index] = nuevoNombre;
         localStorage.setItem('categorias', JSON.stringify(window.categorias));
+        localStorage.setItem('productos', JSON.stringify(window.productos));
         cargarCategorias();
+        cargarProductos();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarCategoria'));
+        modal.hide();
     }
 }
 
@@ -530,62 +602,58 @@ function modificarProducto(id) {
     const producto = window.productos.find(p => p.id === id);
     if (!producto) return;
 
-    const nuevoNombre = prompt('Ingrese el nuevo nombre:', producto.nombre);
-    if (!nuevoNombre) return;
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarProducto'));
+    const idInput = document.getElementById('productoIdModificar');
+    const nombreInput = document.getElementById('nombreProductoModificar');
+    const precioInput = document.getElementById('precioProductoModificar');
+    const categoriaSelect = document.getElementById('categoriaProductoModificar');
 
-    const nuevoPrecio = prompt('Ingrese el nuevo precio:', producto.precio);
-    if (!nuevoPrecio || isNaN(nuevoPrecio)) {
-        alert('Por favor ingrese un precio válido');
-        return;
-    }
+    // Llenar el select de categorías
+    categoriaSelect.innerHTML = '<option value="">Seleccionar categoría</option>';
+    window.categorias.forEach(categoria => {
+        const option = document.createElement('option');
+        option.value = categoria;
+        option.textContent = categoria;
+        if (categoria === producto.categoria) {
+            option.selected = true;
+        }
+        categoriaSelect.appendChild(option);
+    });
 
-    const nuevaCategoria = prompt('Ingrese la nueva categoría:', producto.categoria);
-    if (!nuevaCategoria || !window.categorias.includes(nuevaCategoria)) {
-        alert('Por favor ingrese una categoría válida');
-        return;
-    }
+    idInput.value = id;
+    nombreInput.value = producto.nombre;
+    precioInput.value = producto.precio;
 
-    producto.nombre = nuevoNombre;
-    producto.precio = parseFloat(nuevoPrecio);
-    producto.categoria = nuevaCategoria;
-
-    localStorage.setItem('productos', JSON.stringify(window.productos));
-    cargarProductos();
+    modal.show();
 }
 
-function modificarCliente(id) {
-    const cliente = window.clientes.find(c => c.id === id);
-    if (!cliente) return;
+function guardarModificacionProducto() {
+    const idInput = document.getElementById('productoIdModificar');
+    const nombreInput = document.getElementById('nombreProductoModificar');
+    const precioInput = document.getElementById('precioProductoModificar');
+    const categoriaSelect = document.getElementById('categoriaProductoModificar');
 
-    const nuevoDocumento = prompt('Ingrese el nuevo documento:', cliente.documento);
-    if (!nuevoDocumento) return;
+    const id = parseInt(idInput.value);
+    const nombre = nombreInput.value.trim();
+    const precio = parseInt(precioInput.value);
+    const categoria = categoriaSelect.value;
 
-    const nuevoNombre = prompt('Ingrese el nuevo nombre:', cliente.nombre);
-    if (!nuevoNombre) return;
-
-    const nuevoApellido = prompt('Ingrese el nuevo apellido:', cliente.apellido);
-    if (!nuevoApellido) return;
-
-    const nuevoTelefono = prompt('Ingrese el nuevo teléfono:', cliente.telefono);
-    if (!nuevoTelefono) return;
-
-    const nuevoCorreo = prompt('Ingrese el nuevo correo:', cliente.correo);
-    if (!nuevoCorreo) return;
-
-    if (nuevoDocumento !== cliente.documento && 
-        window.clientes.some(c => c.documento === nuevoDocumento)) {
-        alert('Ya existe un cliente con este documento');
+    if (!nombre || !precio || !categoria) {
+        alert('Por favor complete todos los campos');
         return;
     }
 
-    cliente.documento = nuevoDocumento;
-    cliente.nombre = nuevoNombre;
-    cliente.apellido = nuevoApellido;
-    cliente.telefono = nuevoTelefono;
-    cliente.correo = nuevoCorreo;
-
-    localStorage.setItem('clientes', JSON.stringify(window.clientes));
-    cargarClientes();
+    const producto = window.productos.find(p => p.id === id);
+    if (producto) {
+        producto.nombre = nombre;
+        producto.precio = precio;
+        producto.categoria = categoria;
+        localStorage.setItem('productos', JSON.stringify(window.productos));
+        cargarProductos();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarProducto'));
+        modal.hide();
+    }
 }
 
 // Funciones para Cierre Diario

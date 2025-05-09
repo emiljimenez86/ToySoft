@@ -13,11 +13,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-4 px-2 px-md-4">
         <div class="row mb-4">
             <div class="col-12">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <h1 class="text-white mb-3 mb-md-0">Administración</h1>
+                    <h1 class="text-white mb-3 mb-md-0 fs-2 fs-md-1">Administración</h1>
                     <a href="index.html" class="btn btn-outline-light">Volver al Inicio</a>
                 </div>
             </div>
@@ -26,7 +26,7 @@
         <!-- Gestión de Clientes -->
         <div class="card bg-dark text-white mb-4">
             <div class="card-header">
-                <h2 class="mb-0">Gestión de Clientes</h2>
+                <h2 class="mb-0 fs-3 fs-md-2">Gestión de Clientes</h2>
             </div>
             <div class="card-body">
                 <div class="mb-3">
@@ -58,13 +58,13 @@
                         <table class="table table-dark table-striped">
                             <thead>
                                 <tr>
-                                    <th>Seleccionar</th>
-                                    <th>Documento</th>
-                                    <th>Nombre</th>
-                                    <th>Apellido</th>
-                                    <th>Teléfono</th>
-                                    <th>Correo</th>
-                                    <th>Acciones</th>
+                                    <th class="text-nowrap">Seleccionar</th>
+                                    <th class="text-nowrap">Documento</th>
+                                    <th class="text-nowrap">Nombre</th>
+                                    <th class="text-nowrap">Apellido</th>
+                                    <th class="text-nowrap">Teléfono</th>
+                                    <th class="text-nowrap">Correo</th>
+                                    <th class="text-nowrap">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="listaClientes">
@@ -73,15 +73,15 @@
                         </table>
                     </div>
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
-                        <div class="mb-3 mb-md-0">
+                        <div class="mb-3 mb-md-0 w-100 w-md-auto">
                             <select id="clientesPorPagina" class="form-select" onchange="cambiarPaginaClientes(1)">
                                 <option value="5">5 por página</option>
                                 <option value="10" selected>10 por página</option>
                                 <option value="20">20 por página</option>
                             </select>
                         </div>
-                        <nav>
-                            <ul class="pagination" id="paginacionClientes">
+                        <nav class="w-100 w-md-auto">
+                            <ul class="pagination justify-content-center" id="paginacionClientes">
                                 <!-- La paginación se generará aquí -->
                             </ul>
                         </nav>
@@ -93,7 +93,7 @@
         <!-- Gestión de Categorías -->
         <div class="card bg-dark text-white mb-4">
             <div class="card-header">
-                <h2 class="mb-0">Gestión de Categorías</h2>
+                <h2 class="mb-0 fs-3 fs-md-2">Gestión de Categorías</h2>
             </div>
             <div class="card-body">
                 <div class="mb-3">
@@ -120,7 +120,7 @@
         <!-- Gestión de Productos -->
         <div class="card bg-dark text-white mb-4">
             <div class="card-header">
-                <h2 class="mb-0">Gestión de Productos</h2>
+                <h2 class="mb-0 fs-3 fs-md-2">Gestión de Productos</h2>
             </div>
             <div class="card-body">
                 <div class="mb-3">
@@ -152,11 +152,11 @@
                         <table class="table table-dark table-striped">
                             <thead>
                                 <tr>
-                                    <th>Seleccionar</th>
-                                    <th>Nombre</th>
-                                    <th>Precio</th>
-                                    <th>Categoría</th>
-                                    <th>Acciones</th>
+                                    <th class="text-nowrap">Seleccionar</th>
+                                    <th class="text-nowrap">Nombre</th>
+                                    <th class="text-nowrap">Precio</th>
+                                    <th class="text-nowrap">Categoría</th>
+                                    <th class="text-nowrap">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="listaProductos">
@@ -165,15 +165,15 @@
                         </table>
                     </div>
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
-                        <div class="mb-3 mb-md-0">
+                        <div class="mb-3 mb-md-0 w-100 w-md-auto">
                             <select id="productosPorPagina" class="form-select" onchange="cambiarPaginaProductos(1)">
                                 <option value="5">5 por página</option>
                                 <option value="10" selected>10 por página</option>
                                 <option value="20">20 por página</option>
                             </select>
                         </div>
-                        <nav>
-                            <ul class="pagination" id="paginacionProductos">
+                        <nav class="w-100 w-md-auto">
+                            <ul class="pagination justify-content-center" id="paginacionProductos">
                                 <!-- La paginación se generará aquí -->
                             </ul>
                         </nav>
@@ -185,15 +185,15 @@
         <!-- Sección de Configuración de Horario -->
         <div class="card bg-dark mb-4">
             <div class="card-body">
-                <h5 class="card-title text-info">Configuración de Horario</h5>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-info" onclick="mostrarModalConfiguracionCierre()">
+                <h5 class="card-title text-info fs-4 fs-md-3">Configuración de Horario</h5>
+                <div class="d-flex flex-column flex-md-row gap-2">
+                    <button class="btn btn-outline-info w-100 w-md-auto" onclick="mostrarModalConfiguracionCierre()">
                         <i class="fas fa-clock"></i> Configurar hora de Cierre
                     </button>
-                    <button class="btn btn-outline-warning" onclick="extenderHorario()">
+                    <button class="btn btn-outline-warning w-100 w-md-auto" onclick="extenderHorario()">
                         <i class="fas fa-clock"></i> Extender Horario
                     </button>
-                    <button class="btn btn-outline-success" onclick="mostrarModalCierreDiario()">
+                    <button class="btn btn-outline-success w-100 w-md-auto" onclick="mostrarModalCierreDiario()">
                         <i class="fas fa-file-invoice-dollar"></i> Cierre Diario
                     </button>
                 </div>
@@ -328,6 +328,95 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" onclick="guardarConfiguracionCierre()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Modificar Cliente -->
+    <div class="modal fade" id="modalModificarCliente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modificar Cliente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formModificarCliente">
+                        <input type="hidden" id="clienteIdModificar">
+                        <div class="mb-3">
+                            <label for="nombreClienteModificar" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombreClienteModificar" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="telefonoClienteModificar" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefonoClienteModificar" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarModificacionCliente()">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Modificar Categoría -->
+    <div class="modal fade" id="modalModificarCategoria" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modificar Categoría</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formModificarCategoria">
+                        <input type="hidden" id="categoriaActualModificar">
+                        <div class="mb-3">
+                            <label for="nombreCategoriaModificar" class="form-label">Nombre de la categoría</label>
+                            <input type="text" class="form-control" id="nombreCategoriaModificar" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarModificacionCategoria()">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Modificar Producto -->
+    <div class="modal fade" id="modalModificarProducto" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modificar Producto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formModificarProducto">
+                        <input type="hidden" id="productoIdModificar">
+                        <div class="mb-3">
+                            <label for="nombreProductoModificar" class="form-label">Nombre del producto</label>
+                            <input type="text" class="form-control" id="nombreProductoModificar" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="precioProductoModificar" class="form-label">Precio</label>
+                            <input type="number" class="form-control" id="precioProductoModificar" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoriaProductoModificar" class="form-label">Categoría</label>
+                            <select class="form-select" id="categoriaProductoModificar" required>
+                                <option value="">Seleccionar categoría</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarModificacionProducto()">Guardar cambios</button>
                 </div>
             </div>
         </div>
