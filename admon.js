@@ -351,34 +351,29 @@ function cargarProductos() {
 
 // Funciones para Clientes
 function agregarCliente() {
-    console.log('Intentando agregar cliente...');
     const documento = document.getElementById('documentoCliente').value.trim();
     const nombre = document.getElementById('nombreCliente').value.trim();
     const apellido = document.getElementById('apellidoCliente').value.trim();
     const telefono = document.getElementById('telefonoCliente').value.trim();
+    const direccion = document.getElementById('direccionCliente').value.trim();
     const correo = document.getElementById('correoCliente').value.trim();
 
-    if (!documento || !nombre || !apellido || !telefono || !correo) {
-        alert('Por favor complete todos los campos');
+    if (!documento || !nombre || !apellido || !telefono) {
+        alert('Por favor complete todos los campos obligatorios (Documento, Nombre, Apellido y Teléfono)');
         return;
     }
 
-    if (window.clientes.some(c => c.documento === documento)) {
-        alert('Ya existe un cliente con este documento');
-        return;
-    }
-
-    const cliente = {
+    const nuevoCliente = {
         id: Date.now(),
-        documento: documento,
-        nombre: nombre,
-        apellido: apellido,
-        telefono: telefono,
-        correo: correo,
-        fechaRegistro: new Date().toISOString()
+        documento,
+        nombre,
+        apellido,
+        telefono,
+        direccion,
+        correo
     };
 
-    window.clientes.push(cliente);
+    window.clientes.push(nuevoCliente);
     localStorage.setItem('clientes', JSON.stringify(window.clientes));
     cargarClientes();
 
@@ -387,46 +382,39 @@ function agregarCliente() {
     document.getElementById('nombreCliente').value = '';
     document.getElementById('apellidoCliente').value = '';
     document.getElementById('telefonoCliente').value = '';
+    document.getElementById('direccionCliente').value = '';
     document.getElementById('correoCliente').value = '';
-    console.log('Cliente agregado:', cliente);
 }
 
 function cargarClientes() {
-    console.log('Cargando clientes...');
-    const listaClientes = document.getElementById('listaClientes');
-    if (!listaClientes) {
-        console.error('No se encontró el elemento para cargar clientes');
-        return;
-    }
+    const tbody = document.getElementById('listaClientes');
+    if (!tbody) return;
 
-    // Usar clientes filtrados si hay búsqueda, sino usar todos los clientes
-    const clientesAMostrar = clientesFiltrados.length > 0 ? clientesFiltrados : window.clientes;
-    
-    // Calcular paginación
     const inicio = (paginaActualClientes - 1) * clientesPorPagina;
     const fin = inicio + clientesPorPagina;
-    const clientesPaginados = clientesAMostrar.slice(inicio, fin);
+    const clientesAMostrar = clientesFiltrados.slice(inicio, fin);
 
-    listaClientes.innerHTML = '';
-
-    clientesPaginados.forEach(cliente => {
+    tbody.innerHTML = '';
+    clientesAMostrar.forEach(cliente => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="checkbox" class="form-check-input checkbox-alerta" value="${cliente.id}"></td>
+            <td><input type="checkbox" value="${cliente.id}"></td>
             <td>${cliente.documento}</td>
             <td>${cliente.nombre}</td>
             <td>${cliente.apellido}</td>
             <td>${cliente.telefono}</td>
-            <td>${cliente.correo}</td>
+            <td>${cliente.direccion || '-'}</td>
+            <td>${cliente.correo || '-'}</td>
             <td>
-                <button class="btn btn-sm btn-outline-info" onclick="modificarCliente(${cliente.id})">Modificar</button>
+                <button class="btn btn-sm btn-info" onclick="modificarCliente(${cliente.id})">
+                    <i class="fas fa-edit"></i>
+                </button>
             </td>
         `;
-        listaClientes.appendChild(tr);
+        tbody.appendChild(tr);
     });
 
-    // Generar paginación
-    const totalPaginas = Math.ceil(clientesAMostrar.length / clientesPorPagina);
+    const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
     generarPaginacion('paginacionClientes', totalPaginas, paginaActualClientes, cambiarPaginaClientes);
 }
 
@@ -513,42 +501,38 @@ function modificarCliente(id) {
     const cliente = window.clientes.find(c => c.id === id);
     if (!cliente) return;
 
-    const modal = new bootstrap.Modal(document.getElementById('modalModificarCliente'));
-    const idInput = document.getElementById('clienteIdModificar');
-    const nombreInput = document.getElementById('nombreClienteModificar');
-    const telefonoInput = document.getElementById('telefonoClienteModificar');
+    const nuevoDocumento = prompt('Documento:', cliente.documento);
+    if (nuevoDocumento === null) return;
 
-    idInput.value = id;
-    nombreInput.value = cliente.nombre;
-    telefonoInput.value = cliente.telefono;
+    const nuevoNombre = prompt('Nombre:', cliente.nombre);
+    if (nuevoNombre === null) return;
 
-    modal.show();
-}
+    const nuevoApellido = prompt('Apellido:', cliente.apellido);
+    if (nuevoApellido === null) return;
 
-function guardarModificacionCliente() {
-    const idInput = document.getElementById('clienteIdModificar');
-    const nombreInput = document.getElementById('nombreClienteModificar');
-    const telefonoInput = document.getElementById('telefonoClienteModificar');
+    const nuevoTelefono = prompt('Teléfono:', cliente.telefono);
+    if (nuevoTelefono === null) return;
 
-    const id = parseInt(idInput.value);
-    const nombre = nombreInput.value.trim();
-    const telefono = telefonoInput.value.trim();
+    const nuevaDireccion = prompt('Dirección:', cliente.direccion || '');
+    if (nuevaDireccion === null) return;
 
-    if (!nombre || !telefono) {
-        alert('Por favor complete todos los campos');
+    const nuevoCorreo = prompt('Correo electrónico (opcional):', cliente.correo || '');
+    if (nuevoCorreo === null) return;
+
+    if (!nuevoDocumento || !nuevoNombre || !nuevoApellido || !nuevoTelefono) {
+        alert('Los campos Documento, Nombre, Apellido y Teléfono son obligatorios');
         return;
     }
 
-    const cliente = window.clientes.find(c => c.id === id);
-    if (cliente) {
-        cliente.nombre = nombre;
-        cliente.telefono = telefono;
-        localStorage.setItem('clientes', JSON.stringify(window.clientes));
-        cargarClientes();
-        
-        const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarCliente'));
-        modal.hide();
-    }
+    cliente.documento = nuevoDocumento;
+    cliente.nombre = nuevoNombre;
+    cliente.apellido = nuevoApellido;
+    cliente.telefono = nuevoTelefono;
+    cliente.direccion = nuevaDireccion;
+    cliente.correo = nuevoCorreo;
+
+    localStorage.setItem('clientes', JSON.stringify(window.clientes));
+    cargarClientes();
 }
 
 function modificarCategoria(nombreActual) {
@@ -974,4 +958,78 @@ function extenderHorario() {
         localStorage.setItem('configuracionCierre', JSON.stringify(configuracion));
         alert('Horario extendido exitosamente');
     }
-} 
+}
+
+// Funciones para manejar el logo
+function previewLogo(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validar tipo de archivo
+  if (!file.type.match('image.*')) {
+    alert('Por favor seleccione una imagen válida');
+    return;
+  }
+
+  // Validar tamaño (500KB máximo)
+  if (file.size > 500 * 1024) {
+    alert('La imagen no debe superar los 500KB');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const logoActual = document.getElementById('logoActual');
+    const noLogo = document.getElementById('noLogo');
+    
+    logoActual.src = e.target.result;
+    logoActual.style.display = 'block';
+    noLogo.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function guardarLogo() {
+  const logoActual = document.getElementById('logoActual');
+  if (!logoActual.src || logoActual.src === window.location.href) {
+    alert('Por favor seleccione un logo primero');
+    return;
+  }
+
+  // Guardar el logo en localStorage
+  localStorage.setItem('logoNegocio', logoActual.src);
+  alert('Logo guardado correctamente');
+}
+
+function eliminarLogo() {
+  if (confirm('¿Está seguro de eliminar el logo?')) {
+    localStorage.removeItem('logoNegocio');
+    const logoActual = document.getElementById('logoActual');
+    const noLogo = document.getElementById('noLogo');
+    
+    logoActual.src = '';
+    logoActual.style.display = 'none';
+    noLogo.style.display = 'block';
+    
+    alert('Logo eliminado correctamente');
+  }
+}
+
+// Función para cargar el logo al iniciar
+function cargarLogo() {
+  const logoGuardado = localStorage.getItem('logoNegocio');
+  if (logoGuardado) {
+    const logoActual = document.getElementById('logoActual');
+    const noLogo = document.getElementById('noLogo');
+    
+    logoActual.src = logoGuardado;
+    logoActual.style.display = 'block';
+    noLogo.style.display = 'none';
+  }
+}
+
+// Agregar la llamada a cargarLogo en la función de inicialización
+document.addEventListener('DOMContentLoaded', function() {
+  cargarDatos();
+  cargarLogo();
+}); 

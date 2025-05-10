@@ -36,7 +36,8 @@
                             <input type="text" id="nombreCliente" class="form-control mt-2" placeholder="Nombres">
                             <input type="text" id="apellidoCliente" class="form-control mt-2" placeholder="Apellidos">
                             <input type="tel" id="telefonoCliente" class="form-control mt-2" placeholder="Teléfono">
-                            <input type="email" id="correoCliente" class="form-control mt-2" placeholder="Correo electrónico">
+                            <input type="text" id="direccionCliente" class="form-control mt-2" placeholder="Dirección">
+                            <input type="email" id="correoCliente" class="form-control mt-2" placeholder="Correo electrónico (opcional)">
                         </div>
                     </div>
                     <div class="row mt-3">
@@ -63,6 +64,7 @@
                                     <th class="text-nowrap">Nombre</th>
                                     <th class="text-nowrap">Apellido</th>
                                     <th class="text-nowrap">Teléfono</th>
+                                    <th class="text-nowrap">Dirección</th>
                                     <th class="text-nowrap">Correo</th>
                                     <th class="text-nowrap">Acciones</th>
                                 </tr>
@@ -200,49 +202,46 @@
             </div>
         </div>
 
-        <!-- Sección de Backup y Restauración -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card bg-dark">
-                    <div class="card-body">
-                        <h4 class="text-info mb-3">Backup y Restauración</h4>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="card bg-dark border-light">
-                                    <div class="card-body">
-                                        <h5 class="text-info">Backup Manual</h5>
-                                        <p class="text-muted">Descarga un archivo con todos los datos del sistema.</p>
-                                        <button class="btn btn-success" onclick="exportarDatos()">
-                                            <i class="fas fa-download"></i> Descargar Backup
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card bg-dark border-light">
-                                    <div class="card-body">
-                                        <h5 class="text-info">Restaurar desde Archivo</h5>
-                                        <p class="text-muted">Restaura los datos desde un archivo de backup.</p>
-                                        <label class="btn btn-primary">
-                                            <i class="fas fa-upload"></i> Seleccionar Archivo
-                                            <input type="file" accept=".json" onchange="importarDatos(event)" style="display: none;">
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="card bg-dark border-light">
-                                    <div class="card-body">
-                                        <h5 class="text-info">Backups Automáticos</h5>
-                                        <p class="text-muted">Se realizan automáticamente cada 30 minutos. Se mantienen los últimos 5 backups.</p>
-                                        <button class="btn btn-info" onclick="mostrarBackupsAutomaticos()">
-                                            <i class="fas fa-clock"></i> Ver Backups Automáticos
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Sección de Backup -->
+        <div class="card bg-dark mb-4">
+            <div class="card-body">
+                <h4 class="text-info mb-3">Backup y Restauración</h4>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-info" onclick="exportarDatos()">
+                        <i class="fas fa-download"></i> Exportar Datos
+                    </button>
+                    <input type="file" id="inputImportarDatos" style="display:none" accept="application/json" onchange="importarDatos(event)">
+                    <button class="btn btn-outline-info" onclick="document.getElementById('inputImportarDatos').click()">
+                        <i class="fas fa-upload"></i> Importar Datos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Logo -->
+        <div class="card bg-dark mb-4">
+            <div class="card-body">
+                <h4 class="text-info mb-3">Logo del Negocio</h4>
+                <div class="mb-3">
+                    <label class="form-label">Logo Actual</label>
+                    <div id="logoPreview" class="mb-2">
+                        <img id="logoActual" src="" alt="Logo actual" style="max-width: 200px; max-height: 100px; display: none;">
+                        <p id="noLogo" class="text-muted">No hay logo cargado</p>
                     </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cargar Nuevo Logo</label>
+                    <input type="file" class="form-control bg-dark text-white border-light" 
+                           id="logoInput" accept="image/*" onchange="previewLogo(event)">
+                    <small class="text-muted">Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 500KB</small>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-info" onclick="guardarLogo()">
+                        <i class="fas fa-save"></i> Guardar Logo
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="eliminarLogo()">
+                        <i class="fas fa-trash"></i> Eliminar Logo
+                    </button>
                 </div>
             </div>
         </div>

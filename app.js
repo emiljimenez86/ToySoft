@@ -591,7 +591,7 @@ function imprimirTicketCocina(mesa, productos) {
         <style>
           body { 
             font-family: monospace;
-            font-size: 10px;
+            font-size: 14px;
             width: 80mm;
             margin: 0;
             padding: 2mm;
@@ -607,7 +607,7 @@ function imprimirTicketCocina(mesa, productos) {
           th, td { 
             padding: 1px;
             text-align: left;
-            font-size: 10px;
+            font-size: 14px;
           }
           .border-top { 
             border-top: 1px dashed #000;
@@ -621,10 +621,10 @@ function imprimirTicketCocina(mesa, productos) {
           }
           .producto {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 15px;
           }
           .detalles {
-            font-size: 9px;
+            font-size: 13px;
             color: #000;
             font-style: italic;
             margin-top: 1px;
@@ -635,15 +635,15 @@ function imprimirTicketCocina(mesa, productos) {
             padding: 2px;
             border: 1px dashed #000;
             border-radius: 2px;
-            font-size: 9px;
+            font-size: 13px;
           }
           .cliente-label {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 15px;
             margin-bottom: 1px;
           }
           .cliente-datos {
-            font-size: 9px;
+            font-size: 13px;
             line-height: 1.2;
           }
           .botones-impresion {
@@ -680,6 +680,7 @@ function imprimirTicketCocina(mesa, productos) {
         <div class="header text-center">
           <h2 style="margin: 0; font-size: 14px;">COCINA</h2>
           <div class="mb-1">Mesa: ${mesa}</div>
+          <div class="mb-1">Ronda: ${pedidoCompleto && pedidoCompleto.ronda ? pedidoCompleto.ronda : 1}</div>
           <div class="mb-1">${new Date().toLocaleString()}</div>
         </div>
         
@@ -875,11 +876,27 @@ function seleccionarClientePago(cliente) {
 
 // Función para calcular el cambio
 function calcularCambio() {
-  const montoRecibido = parseInt(document.getElementById('montoRecibido').value) || 0;
+  const montoRecibido = parseFloat(document.getElementById('montoRecibido').value) || 0;
   const totalText = document.getElementById('totalModal').textContent;
-  const total = parseInt(totalText.replace(/[^0-9.-]+/g, '')) || 0;
-  const cambio = montoRecibido - total;
-  document.getElementById('cambio').textContent = `$ ${cambio}`;
+  // Extraer solo los números del texto del total
+  const total = parseFloat(totalText.replace(/[^\d]/g, '')) || 0;
+  
+  // Asegurarnos de que ambos números sean válidos
+  if (isNaN(montoRecibido) || isNaN(total)) {
+    document.getElementById('cambio').textContent = 'Devolver en efectivo: $0';
+    return;
+  }
+  
+  // Calcular la diferencia
+  const devolver = montoRecibido - total;
+  
+  // Mostrar el resultado
+  document.getElementById('cambio').textContent = `Devolver en efectivo: ${formatearPrecio(devolver)}`;
+  
+  // Para depuración
+  console.log('Monto recibido:', montoRecibido);
+  console.log('Total:', total);
+  console.log('Devolver:', devolver);
 }
 
 // Función para alternar entre métodos de pago
@@ -1204,11 +1221,11 @@ function procesarPago() {
   const contenido = `
     <html>
       <head>
-        <title>Factura</title>
+        <title>Recibo</title>
         <style>
           body { 
             font-family: monospace;
-            font-size: 10px;
+            font-size: 14px;
             width: 80mm;
             margin: 0;
             padding: 2mm;
@@ -1217,6 +1234,15 @@ function procesarPago() {
           .text-right { text-align: right; }
           .mb-1 { margin-bottom: 1px; }
           .mt-1 { margin-top: 1px; }
+          .logo-container {
+            text-align: center;
+            margin-bottom: 5px;
+          }
+          .logo-container img {
+            max-width: 100%;
+            max-height: 50px;
+            object-fit: contain;
+          }
           table { 
             width: 100%;
             border-collapse: collapse;
@@ -1225,7 +1251,7 @@ function procesarPago() {
           th, td { 
             padding: 1px;
             text-align: left;
-            font-size: 10px;
+            font-size: 14px;
           }
           .border-top { 
             border-top: 1px dashed #000;
@@ -1239,6 +1265,7 @@ function procesarPago() {
           }
           .total-row {
             font-weight: bold;
+            font-size: 15px;
           }
           .botones-impresion {
             position: fixed;
@@ -1271,9 +1298,15 @@ function procesarPago() {
           <button onclick="window.close()">Cerrar</button>
         </div>
 
+        <div class="logo-container">
+          ${localStorage.getItem('logoNegocio') ? 
+            `<img src="${localStorage.getItem('logoNegocio')}" alt="Logo">` : 
+            ''}
+        </div>
+
         <div class="header text-center">
           <h2 style="margin: 0; font-size: 14px;">RESTAURANTE</h2>
-          <div class="mb-1">${tipoPedido || 'Factura'}</div>
+          ${tipoPedido ? `<div class="mb-1">${tipoPedido}</div>` : ''}
           <div class="mb-1">${factura.fecha}</div>
           ${!factura.mesa.startsWith('DOM-') && !factura.mesa.startsWith('REC-') ? 
             `<div class="mb-1">Mesa: ${factura.mesa}</div>` : ''}
@@ -1293,27 +1326,27 @@ function procesarPago() {
           <tbody>
             ${factura.items.map(item => `
               <tr>
-                <td>${item.nombre}</td>
+                <td><strong>${item.nombre}</strong></td>
                 <td>${item.cantidad}</td>
-                <td>$ ${formatearNumero(item.precio)}</td>
-                <td>$ ${formatearNumero(item.precio * item.cantidad)}</td>
+                <td class="text-right">$ ${formatearNumero(item.precio)}</td>
+                <td class="text-right">$ ${formatearNumero(item.precio * item.cantidad)}</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
         
         <div class="border-top">
-          <div class="mb-1">Subtotal: $ ${formatearNumero(factura.subtotal)}</div>
-          <div class="mb-1">Propina (${factura.propina}%): $ ${formatearNumero(factura.propinaMonto)}</div>
-          <div class="mb-1">Descuento: $ ${formatearNumero(factura.descuento)}</div>
-          <div class="mb-1 total-row">Total: $ ${formatearNumero(factura.total)}</div>
+          <div class="mb-1">Subtotal: <span class="text-right">$ ${formatearNumero(factura.subtotal)}</span></div>
+          <div class="mb-1">Propina (${factura.propina}%): <span class="text-right">$ ${formatearNumero(factura.propinaMonto)}</span></div>
+          <div class="mb-1">Descuento: <span class="text-right">$ ${formatearNumero(factura.descuento)}</span></div>
+          <div class="mb-1 total-row"><strong>Total: $ ${formatearNumero(factura.total)}</strong></div>
         </div>
         
         <div class="border-top">
           <div class="mb-1">Pago: ${factura.metodoPago}</div>
           ${factura.metodoPago === 'efectivo' ? `
-            <div class="mb-1">Recibido: $ ${formatearNumero(factura.montoRecibido)}</div>
-            <div class="mb-1">Cambio: $ ${formatearNumero(factura.cambio)}</div>
+            <div class="mb-1">Recibido: <span class="text-right">$ ${formatearNumero(factura.montoRecibido)}</span></div>
+            <div class="mb-1">Cambio: <span class="text-right">$ ${formatearNumero(factura.cambio)}</span></div>
           ` : ''}
         </div>
         
@@ -1398,11 +1431,11 @@ function reimprimirFactura(ventaId) {
     const contenido = `
       <html>
         <head>
-          <title>Factura</title>
+          <title>Recibo</title>
           <style>
             body { 
               font-family: monospace;
-              font-size: 10px;
+              font-size: 14px;
               width: 80mm;
               margin: 0;
               padding: 2mm;
@@ -1419,7 +1452,7 @@ function reimprimirFactura(ventaId) {
             th, td { 
               padding: 1px;
               text-align: left;
-              font-size: 10px;
+              font-size: 14px;
             }
             .border-top { 
               border-top: 1px dashed #000;
@@ -1433,6 +1466,7 @@ function reimprimirFactura(ventaId) {
             }
             .total-row {
               font-weight: bold;
+              font-size: 15px;
             }
             .botones-impresion {
               position: fixed;
@@ -1465,9 +1499,15 @@ function reimprimirFactura(ventaId) {
             <button onclick="window.close()">Cerrar</button>
           </div>
 
+          <div class="logo-container">
+            ${localStorage.getItem('logoNegocio') ? 
+              `<img src="${localStorage.getItem('logoNegocio')}" alt="Logo">` : 
+              ''}
+          </div>
+
           <div class="header text-center">
             <h2 style="margin: 0; font-size: 14px;">RESTAURANTE</h2>
-            <div class="mb-1">${tipoPedido || 'Factura'}</div>
+            ${tipoPedido ? `<div class="mb-1">${tipoPedido}</div>` : ''}
             <div class="mb-1">${venta.fecha}</div>
             ${!venta.mesa.startsWith('DOM-') && !venta.mesa.startsWith('REC-') ? 
               `<div class="mb-1">Mesa: ${venta.mesa}</div>` : ''}
@@ -1528,8 +1568,13 @@ function mostrarModalCierreDiario() {
     const modal = new bootstrap.Modal(document.getElementById('modalCierreDiario'));
     
     // Obtener ventas del día
-    const hoy = new Date().toLocaleDateString();
-    const ventasHoy = historialVentas.filter(v => new Date(v.fecha).toLocaleDateString() === hoy);
+    const hoy = new Date();
+    const ventasHoy = historialVentas.filter(v => {
+        const fechaVenta = new Date(v.fecha);
+        return fechaVenta.getFullYear() === hoy.getFullYear() &&
+               fechaVenta.getMonth() === hoy.getMonth() &&
+               fechaVenta.getDate() === hoy.getDate();
+    });
     
     // Calcular totales
     const totalVentas = ventasHoy.reduce((sum, v) => sum + v.total, 0);
@@ -1540,7 +1585,7 @@ function mostrarModalCierreDiario() {
     
     // Obtener gastos del día
     const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-    const gastosHoy = gastos.filter(g => new Date(g.fecha).toLocaleDateString() === hoy);
+    const gastosHoy = gastos.filter(g => new Date(g.fecha).toLocaleDateString() === hoy.toLocaleDateString());
     const totalGastos = gastosHoy.reduce((sum, g) => sum + g.monto, 0);
     
     // Calcular balance final
@@ -1672,7 +1717,7 @@ function imprimirBalanceDiario() {
                     <style>
                         body { 
                             font-family: monospace;
-                            font-size: 10px;
+                            font-size: 14px;
                             width: 80mm;
                             margin: 0;
                             padding: 2mm;
@@ -1693,6 +1738,7 @@ function imprimirBalanceDiario() {
                         }
                         .total-row {
                             font-weight: bold;
+                            font-size: 15px;
                         }
                         .botones-impresion {
                             position: fixed;
