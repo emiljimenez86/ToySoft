@@ -32,8 +32,23 @@ function guardarContadores() {
 
 // Función para guardar historial de ventas
 function guardarHistorialVentas() {
-  // Guardar todo el historial de ventas
-  localStorage.setItem('historialVentas', JSON.stringify(historialVentas));
+  try {
+    // Asegurarse de que historialVentas sea un array
+    if (!Array.isArray(historialVentas)) {
+      console.error('historialVentas no es un array:', historialVentas);
+      historialVentas = [];
+    }
+    
+    // Guardar en localStorage
+    localStorage.setItem('historialVentas', JSON.stringify(historialVentas));
+    console.log('Historial de ventas guardado:', historialVentas);
+    
+    // Verificar que se guardó correctamente
+    const guardado = localStorage.getItem('historialVentas');
+    console.log('Verificación de guardado:', guardado);
+  } catch (error) {
+    console.error('Error al guardar historial de ventas:', error);
+  }
 }
 
 // Función para guardar historial de cocina
@@ -44,54 +59,71 @@ function guardarHistorialCocina() {
 
 // Función para cargar datos desde localStorage
 function cargarDatos() {
-  const productosGuardados = localStorage.getItem('productos');
-  const categoriasGuardadas = localStorage.getItem('categorias');
-  const mesasGuardadas = localStorage.getItem('mesasActivas');
-  const ordenesCocinaGuardadas = localStorage.getItem('ordenesCocina');
-  const clientesGuardados = localStorage.getItem('clientes');
-  const contadorDomiciliosGuardado = localStorage.getItem('contadorDomicilios');
-  const contadorRecogerGuardado = localStorage.getItem('contadorRecoger');
-  const historialVentasGuardado = localStorage.getItem('historialVentas');
-  const historialCocinaGuardado = localStorage.getItem('historialCocina');
-  
-  if (productosGuardados) {
-    productos = JSON.parse(productosGuardados);
-  }
-  
-  if (categoriasGuardadas) {
-    categorias = JSON.parse(categoriasGuardadas);
-  }
+  try {
+    const historialVentasGuardado = localStorage.getItem('historialVentas');
+    console.log('Datos guardados en localStorage:', historialVentasGuardado);
+    
+    if (historialVentasGuardado) {
+      historialVentas = JSON.parse(historialVentasGuardado);
+      console.log('Historial de ventas cargado:', historialVentas);
+      
+      // Verificar que se cargó correctamente
+      if (!Array.isArray(historialVentas)) {
+        console.error('Error: historialVentas no es un array después de cargar');
+        historialVentas = [];
+      }
+    } else {
+      console.log('No se encontró historial de ventas en localStorage');
+      historialVentas = [];
+    }
+    
+    // Cargar otros datos...
+    const productosGuardados = localStorage.getItem('productos');
+    const categoriasGuardadas = localStorage.getItem('categorias');
+    const mesasGuardadas = localStorage.getItem('mesasActivas');
+    const ordenesCocinaGuardadas = localStorage.getItem('ordenesCocina');
+    const clientesGuardados = localStorage.getItem('clientes');
+    const contadorDomiciliosGuardado = localStorage.getItem('contadorDomicilios');
+    const contadorRecogerGuardado = localStorage.getItem('contadorRecoger');
+    const historialCocinaGuardado = localStorage.getItem('historialCocina');
+    
+    if (productosGuardados) {
+      productos = JSON.parse(productosGuardados);
+    }
+    
+    if (categoriasGuardadas) {
+      categorias = JSON.parse(categoriasGuardadas);
+    }
 
-  if (mesasGuardadas) {
-    mesasActivas = new Map(JSON.parse(mesasGuardadas));
-  }
+    if (mesasGuardadas) {
+      mesasActivas = new Map(JSON.parse(mesasGuardadas));
+    }
 
-  if (ordenesCocinaGuardadas) {
-    ordenesCocina = new Map(JSON.parse(ordenesCocinaGuardadas));
-  }
+    if (ordenesCocinaGuardadas) {
+      ordenesCocina = new Map(JSON.parse(ordenesCocinaGuardadas));
+    }
 
-  if (clientesGuardados) {
-    clientes = JSON.parse(clientesGuardados);
-  }
+    if (clientesGuardados) {
+      clientes = JSON.parse(clientesGuardados);
+    }
 
-  if (contadorDomiciliosGuardado) {
-    contadorDomicilios = parseInt(contadorDomiciliosGuardado);
-  }
+    if (contadorDomiciliosGuardado) {
+      contadorDomicilios = parseInt(contadorDomiciliosGuardado);
+    }
 
-  if (contadorRecogerGuardado) {
-    contadorRecoger = parseInt(contadorRecogerGuardado);
-  }
+    if (contadorRecogerGuardado) {
+      contadorRecoger = parseInt(contadorRecogerGuardado);
+    }
 
-  if (historialVentasGuardado) {
-    historialVentas = JSON.parse(historialVentasGuardado);
+    if (historialCocinaGuardado) {
+      historialCocina = JSON.parse(historialCocinaGuardado);
+    }
+    
+    mostrarProductos();
+    actualizarMesasActivas();
+  } catch (error) {
+    console.error('Error al cargar datos:', error);
   }
-
-  if (historialCocinaGuardado) {
-    historialCocina = JSON.parse(historialCocinaGuardado);
-  }
-  
-  mostrarProductos();
-  actualizarMesasActivas();
 }
 
 // Función para guardar el estado de las mesas
@@ -178,13 +210,13 @@ function filtrarProductosPorCategoria(categoria) {
 // Función para formatear precio (sin decimales)
 function formatearPrecio(precio) {
   const numero = Math.round(precio);
-  return `$ ${numero.toLocaleString('es-CO')}`;
+  return formatearNumero(numero);
 }
 
 // Función para formatear precio con decimales (para recibos)
 function formatearPrecioRecibo(precio) {
   const numero = Math.round(precio);
-  return `$ ${numero.toLocaleString('es-CO')}`;
+  return formatearNumero(numero);
 }
 
 // Función para mostrar los productos filtrados
@@ -1166,7 +1198,7 @@ function procesarPago() {
   // Crear objeto de factura
   const factura = {
     id: Date.now(),
-    fecha: new Date().toLocaleString(),
+    fecha: new Date().toISOString(), // Guardar fecha en formato ISO
     mesa: mesaSeleccionada,
     items: pedido.items,
     subtotal: subtotal,
@@ -1180,8 +1212,41 @@ function procesarPago() {
     cliente: pedido.cliente || null,
     telefono: pedido.telefono || null,
     direccion: pedido.direccion || null,
-    horaRecoger: pedido.horaRecoger || null
+    horaRecoger: pedido.horaRecoger || null,
+    tipo: mesaSeleccionada.startsWith('DOM-') ? 'domicilio' : 
+          mesaSeleccionada.startsWith('REC-') ? 'recoger' : 'mesa'
   };
+
+  console.log('Factura a guardar:', factura);
+
+  try {
+    // Asegurarse de que historialVentas esté inicializado
+    if (!historialVentas) {
+      historialVentas = [];
+    }
+
+    // Verificar que historialVentas sea un array
+    if (!Array.isArray(historialVentas)) {
+      console.error('historialVentas no es un array:', historialVentas);
+      historialVentas = [];
+    }
+
+    // Agregar al historial de ventas
+    historialVentas.push(factura);
+    console.log('Historial de ventas actualizado:', historialVentas);
+    
+    // Guardar en localStorage
+    guardarHistorialVentas();
+    console.log('Historial de ventas guardado en localStorage');
+
+    // Verificar que se guardó correctamente
+    const guardado = localStorage.getItem('historialVentas');
+    console.log('Verificación de guardado:', guardado);
+  } catch (error) {
+    console.error('Error al guardar la venta:', error);
+    alert('Error al guardar la venta. Por favor, intente nuevamente.');
+    return;
+  }
 
   // Imprimir factura
   const ventana = obtenerVentanaImpresion();
@@ -1359,10 +1424,6 @@ function procesarPago() {
   
   ventana.document.write(contenido);
   ventana.document.close();
-
-  // Agregar al historial de ventas
-  historialVentas.push(factura);
-  guardarHistorialVentas();
 
   // Limpiar la mesa
   mesasActivas.delete(mesaSeleccionada);
@@ -1567,26 +1628,53 @@ function reimprimirFactura(ventaId) {
 function mostrarModalCierreDiario() {
     const modal = new bootstrap.Modal(document.getElementById('modalCierreDiario'));
     
+    // Asegurarse de que historialVentas esté cargado
+    if (!historialVentas || historialVentas.length === 0) {
+        const historialGuardado = localStorage.getItem('historialVentas');
+        if (historialGuardado) {
+            historialVentas = JSON.parse(historialGuardado);
+            console.log('Historial de ventas cargado desde localStorage:', historialVentas);
+        } else {
+            historialVentas = [];
+            console.log('No se encontró historial de ventas en localStorage');
+        }
+    }
+    
     // Obtener ventas del día
     const hoy = new Date();
+    const hoyStr = hoy.toLocaleDateString();
+    console.log('Fecha actual:', hoyStr);
+    console.log('Historial de ventas completo:', historialVentas);
+    
     const ventasHoy = historialVentas.filter(v => {
         const fechaVenta = new Date(v.fecha);
-        return fechaVenta.getFullYear() === hoy.getFullYear() &&
-               fechaVenta.getMonth() === hoy.getMonth() &&
-               fechaVenta.getDate() === hoy.getDate();
+        const fechaVentaStr = fechaVenta.toLocaleDateString();
+        console.log('Comparando fecha venta:', fechaVentaStr, 'con fecha actual:', hoyStr);
+        return fechaVentaStr === hoyStr;
     });
     
+    console.log('Ventas de hoy filtradas:', ventasHoy);
+    
     // Calcular totales
-    const totalVentas = ventasHoy.reduce((sum, v) => sum + v.total, 0);
+    const totalVentas = ventasHoy.reduce((sum, v) => sum + (v.total || 0), 0);
     const totalEfectivo = ventasHoy.filter(v => v.metodoPago === 'efectivo')
-        .reduce((sum, v) => sum + v.total, 0);
+        .reduce((sum, v) => sum + (v.total || 0), 0);
     const totalTransferencia = ventasHoy.filter(v => v.metodoPago === 'transferencia')
-        .reduce((sum, v) => sum + v.total, 0);
+        .reduce((sum, v) => sum + (v.total || 0), 0);
+    
+    console.log('Totales calculados:', {
+        totalVentas,
+        totalEfectivo,
+        totalTransferencia
+    });
     
     // Obtener gastos del día
     const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-    const gastosHoy = gastos.filter(g => new Date(g.fecha).toLocaleDateString() === hoy.toLocaleDateString());
-    const totalGastos = gastosHoy.reduce((sum, g) => sum + g.monto, 0);
+    const gastosHoy = gastos.filter(g => new Date(g.fecha).toLocaleDateString() === hoyStr);
+    const totalGastos = gastosHoy.reduce((sum, g) => sum + (g.monto || 0), 0);
+    
+    console.log('Gastos de hoy:', gastosHoy);
+    console.log('Total gastos:', totalGastos);
     
     // Calcular balance final
     const balanceFinal = totalVentas - totalGastos;
@@ -1595,7 +1683,7 @@ function mostrarModalCierreDiario() {
     document.getElementById('totalVentasHoy').textContent = `$ ${totalVentas.toLocaleString()}`;
     document.getElementById('totalEfectivoHoy').textContent = `$ ${totalEfectivo.toLocaleString()}`;
     document.getElementById('totalTransferenciaHoy').textContent = `$ ${totalTransferencia.toLocaleString()}`;
-    document.getElementById('totalGastos').textContent = `$ ${totalGastos.toLocaleString()}`;
+    document.getElementById('totalGastosHoy').textContent = `$ ${totalGastos.toLocaleString()}`;
     document.getElementById('balanceFinal').textContent = `$ ${balanceFinal.toLocaleString()}`;
     
     modal.show();
@@ -1614,7 +1702,7 @@ function guardarCierreDiario() {
         totalVentas: parseFloat(document.getElementById('totalVentasHoy').textContent.replace('$', '').replace(',', '')),
         totalEfectivo: parseFloat(document.getElementById('totalEfectivoHoy').textContent.replace('$', '').replace(',', '')),
         totalTransferencia: parseFloat(document.getElementById('totalTransferenciaHoy').textContent.replace('$', '').replace(',', '')),
-        totalGastos: parseFloat(document.getElementById('totalGastos').textContent.replace('$', '').replace(',', '')),
+        totalGastos: parseFloat(document.getElementById('totalGastosHoy').textContent.replace('$', '').replace(',', '')),
         balanceFinal: parseFloat(document.getElementById('balanceFinal').textContent.replace('$', '').replace(',', '')),
         detalles
     };
@@ -1903,7 +1991,7 @@ function mostrarModalHistorialCocina() {
 
 // Función para formatear número
 function formatearNumero(num) {
-  return num.toLocaleString('es-CO');
+  return `$ ${num.toLocaleString('es-CO')}`;
 }
 
 // Función para inicializar WhatsApp Web
@@ -2048,5 +2136,142 @@ function guardarConfiguracionCierre() {
     } else {
         alert('Configuración de hora de cierre desactivada. No habrá restricciones de horario.');
     }
+}
+
+// Funciones para gestionar gastos
+function modificarGasto(id) {
+    const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+    const gasto = gastos.find(g => g.id === id);
+    
+    if (!gasto) {
+        alert('Gasto no encontrado');
+        return;
+    }
+
+    // Llenar el formulario con los datos del gasto
+    document.getElementById('descripcionGasto').value = gasto.descripcion;
+    document.getElementById('montoGasto').value = gasto.monto;
+    document.getElementById('fechaGasto').value = gasto.fecha.split('T')[0];
+    
+    // Cambiar el botón de guardar por uno de actualizar
+    const btnGuardar = document.getElementById('btnGuardarGasto');
+    btnGuardar.textContent = 'Actualizar Gasto';
+    btnGuardar.onclick = () => actualizarGasto(id);
+}
+
+function actualizarGasto(id) {
+    const descripcion = document.getElementById('descripcionGasto').value;
+    const monto = parseFloat(document.getElementById('montoGasto').value);
+    const fecha = document.getElementById('fechaGasto').value;
+    
+    if (!descripcion || !monto || !fecha) {
+        alert('Por favor, complete todos los campos');
+        return;
+    }
+    
+    const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+    const index = gastos.findIndex(g => g.id === id);
+    
+    if (index === -1) {
+        alert('Gasto no encontrado');
+        return;
+    }
+    
+    gastos[index] = {
+        ...gastos[index],
+        descripcion,
+        monto,
+        fecha: new Date(fecha).toISOString()
+    };
+    
+    localStorage.setItem('gastos', JSON.stringify(gastos));
+    
+    // Limpiar formulario
+    document.getElementById('descripcionGasto').value = '';
+    document.getElementById('montoGasto').value = '';
+    document.getElementById('fechaGasto').value = '';
+    
+    // Restaurar el botón de guardar
+    const btnGuardar = document.getElementById('btnGuardarGasto');
+    btnGuardar.textContent = 'Guardar Gasto';
+    btnGuardar.onclick = guardarGasto;
+    
+    mostrarGastos();
+    alert('Gasto actualizado exitosamente');
+}
+
+function eliminarGasto(id) {
+    if (!confirm('¿Está seguro que desea eliminar este gasto?')) {
+        return;
+    }
+    
+    const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+    const gastosFiltrados = gastos.filter(g => g.id !== id);
+    
+    localStorage.setItem('gastos', JSON.stringify(gastosFiltrados));
+    mostrarGastos();
+    alert('Gasto eliminado exitosamente');
+}
+
+function mostrarGastos() {
+    const tablaGastos = document.getElementById('tablaGastos');
+    const cuerpoTabla = tablaGastos.querySelector('tbody');
+    cuerpoTabla.innerHTML = '';
+    
+    const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+    
+    gastos.forEach(gasto => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td>${new Date(gasto.fecha).toLocaleDateString()}</td>
+            <td>${gasto.descripcion}</td>
+            <td>$${gasto.monto.toLocaleString()}</td>
+            <td>
+                <button class="btn btn-sm btn-warning" onclick="modificarGasto(${gasto.id})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarGasto(${gasto.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        cuerpoTabla.appendChild(fila);
+    });
+}
+
+function mostrarModalGastos() {
+    const modalGastos = new bootstrap.Modal(document.getElementById('modalGastos'));
+    modalGastos.show();
+    mostrarGastos();
+}
+
+function guardarGasto() {
+    const descripcion = document.getElementById('descripcionGasto').value;
+    const monto = parseFloat(document.getElementById('montoGasto').value);
+    const fecha = document.getElementById('fechaGasto').value;
+    
+    if (!descripcion || !monto || !fecha) {
+        alert('Por favor, complete todos los campos');
+        return;
+    }
+    
+    const gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+    const nuevoGasto = {
+        id: Date.now(),
+        descripcion,
+        monto,
+        fecha: new Date(fecha).toISOString()
+    };
+    
+    gastos.push(nuevoGasto);
+    localStorage.setItem('gastos', JSON.stringify(gastos));
+    
+    // Limpiar formulario
+    document.getElementById('descripcionGasto').value = '';
+    document.getElementById('montoGasto').value = '';
+    document.getElementById('fechaGasto').value = '';
+    
+    mostrarGastos();
+    alert('Gasto guardado exitosamente');
 }
   

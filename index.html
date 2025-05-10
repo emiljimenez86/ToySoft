@@ -248,14 +248,15 @@
           <div class="mb-3">
             <h6>Resumen de Ventas</h6>
             <div>Total Ventas: <span id="totalVentasHoy">$ 0</span></div>
-            <div>Efectivo: <span id="totalEfectivoHoy">$ 0</span></div>
-            <div>Transferencia: <span id="totalTransferenciaHoy">$ 0</span></div>
+            <div>Total Efectivo: <span id="totalEfectivoHoy">$ 0</span></div>
+            <div>Total Transferencias: <span id="totalTransferenciasHoy">$ 0</span></div>
           </div>
-          
           <div class="mb-3">
             <h6>Gastos del Día</h6>
-            <div>Total Gastos: <span id="totalGastos">$ 0</span></div>
-            <small class="text-muted">Los gastos se toman del sistema de Gastos Diarios</small>
+            <div>Total Gastos: <span id="totalGastosHoy">$ 0</span></div>
+            <button class="btn btn-info mt-2" onclick="mostrarModalGastos()">
+              <i class="fas fa-receipt"></i> Gestionar Gastos
+            </button>
           </div>
           
           <div class="mb-3">
@@ -271,6 +272,66 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-primary" onclick="guardarCierreDiario()">Guardar Cierre</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Gastos -->
+  <div class="modal fade" id="modalGastos" tabindex="-1" aria-labelledby="modalGastosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalGastosLabel">Gestión de Gastos</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Formulario de Gastos -->
+          <form id="formGasto" class="mb-4">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="descripcionGasto" class="form-label">Descripción</label>
+                  <input type="text" class="form-control bg-dark text-white border-light" id="descripcionGasto" required>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="montoGasto" class="form-label">Monto</label>
+                  <input type="number" class="form-control bg-dark text-white border-light" id="montoGasto" required>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="fechaGasto" class="form-label">Fecha</label>
+                  <input type="date" class="form-control bg-dark text-white border-light" id="fechaGasto" required>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-info" id="btnGuardarGasto" onclick="guardarGasto()">
+              <i class="fas fa-save"></i> Guardar Gasto
+            </button>
+          </form>
+
+          <!-- Tabla de Gastos -->
+          <div class="table-responsive">
+            <table class="table table-dark" id="tablaGastos">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Monto</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Los gastos se cargarán aquí -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
     </div>
